@@ -53,14 +53,19 @@ export interface StandardRecommendation {
   standard: Standard;
   relevanceScore: number;
   relevance: 'high' | 'medium' | 'low';
+  matchType?: 'primary' | 'alternative' | 'related';
   matchReasons: string[];
+  evidenceIds?: string[];
 }
 
 export interface ProductIdentification {
   name: string;
   category: string;
+  material?: string;
+  intendedUse?: string;
   confidence: number;
   keywords: string[];
+  isAmbiguous?: boolean;
 }
 
 // Certification types

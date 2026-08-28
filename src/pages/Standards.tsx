@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { CheckCircle, AlertCircle, RefreshCcw, Search } from "lucide-react";
+import { Search, Info, HelpCircle, FileText, ArrowRight } from "lucide-react";
 import { useAppStore } from '../lib/store';
 import { searchStandards, identifyProduct } from "../services/standardsService";
 import { StandardCard } from '../components/common/StandardCard';
+import { ProductIdentificationCard } from '../components/common/ProductIdentificationCard';
+import { RelevanceExplanation } from '../components/common/RelevanceExplanation';
 import { PageHeader } from '../components/ui/PageHeader';
 import { Input } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
@@ -12,74 +14,119 @@ import { SkeletonCard } from "../components/ui/LoadingSkeleton";
 import { EmptyState } from '../components/ui/EmptyState';
 import { ErrorState } from '../components/ui/ErrorState';
 import { Modal } from '../components/ui/Modal';
-import { Standard, StandardRecommendation } from "../types";
+import { StandardRecommendation, ProductIdentification, SearchFilters } from "../types";
+import { useTranslation } from '../hooks/useTranslation';
 
 export default function Standards() {
   const [searchParams, setSearchParams] = useSearchParams();
   const query = searchParams.get('q') || '';
   const navigate = useNavigate();
+  const { t } = useTranslation();
   
+  const { isSaved, addSavedItem, removeSavedItem } = useAppStore();
+
   const [localQuery, setLocalQuery] = useState(query);
   const [standards, setStandards] = useState<StandardRecommendation[]>([]);
+  const [productIdent, setProductIdent] = useState<ProductIdentification | null>(null);
+  
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
-  const [identifiedProduct, setIdentifiedProduct] = useState<any>(null);
   
-  const [showAnalysisModal, setShowAnalysisModal] = useState(false);
-  
-  // Filters state
+  // Filters and Sort
   const [category, setCategory] = useState('');
   const [status, setStatus] = useState('');
+  const [sortParam, setSortParam] = useState('relevance');
+  
+  const [showAnalysisModal, setShowAnalysisModal] = useState(false);
+
+  useEffect(() => {
+    setLocalQuery(query);
+    if (query) {
+      fetchResults(query);
+    } else {
+      setStandards([]);
+      setProductIdent(null);
+    }
+  }, [query]);
 
   const fetchResults = async (searchQuery: string) => {
-    if (!searchQuery) {
-      setStandards([]);
-      setIdentifiedProduct(null);
-      return;
-    }
-    
     setIsLoading(true);
     setError(null);
     try {
+      const filters: SearchFilters = {};
       const [results, product] = await Promise.all([
-        searchStandards(searchQuery),
+        searchStandards(searchQuery, filters),
         identifyProduct(searchQuery)
       ]);
       setStandards(results);
-      setIdentifiedProduct(product);
+      setProductIdent(product);
     } catch (err) {
-      setError(err instanceof Error ? err : new Error('Failed to fetch results'));
+      setError(err instanceof Error ? err : new Error('An error occurred'));
     } finally {
       setIsLoading(false);
     }
   };
 
-  useEffect(() => {
-    setLocalQuery(query);
-    fetchResults(query);
-  }, [query]);
-
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (localQuery.trim()) {
-      setSearchParams({ q: localQuery });
+      setSearchParams({ q: localQuery.trim() });
     } else {
       setSearchParams({});
     }
   };
 
-  // Filtered standards
-  const filteredStandards = standards.filter(std => {
+  const handleProductUpdate = async (updated: Partial<ProductIdentification>) => {
+    if (!productIdent) return;
+    const newQuery = updated.name || localQuery;
+    setLocalQuery(newQuery);
+    setSearchParams({ q: newQuery });
+    // In a real app, we would pass these explicit attributes to the backend
+    setProductIdent({ ...productIdent, ...updated, isAmbiguous: false });
+  };
+
+  const toggleSave = (std: StandardRecommendation) => {
+    if (isSaved(std.standard.id)) {
+      removeSavedItem(std.standard.id);
+    } else {
+      addSavedItem({
+        id: Date.now().toString(),
+        itemId: std.standard.id,
+        type: 'standard',
+        title: std.standard.title,
+        savedDate: new Date().toISOString()
+      });
+    }
+  };
+
+  // Filtering and Sorting
+  let filteredStandards = standards.filter(std => {
     if (category && std.standard.category !== category) return false;
     if (status && std.standard.status !== status) return false;
     return true;
   });
 
+  if (sortParam === 'az') {
+    filteredStandards = [...filteredStandards].sort((a, b) => a.standard.title.localeCompare(b.standard.title));
+  } else if (sortParam === 'recent') {
+    filteredStandards = [...filteredStandards].sort((a, b) => b.standard.year - a.standard.year);
+  } else if (sortParam === 'number') {
+    filteredStandards = [...filteredStandards].sort((a, b) => a.standard.standardNumber.localeCompare(b.standard.standardNumber));
+  }
+
+  const primaryStandards = filteredStandards.filter(s => s.matchType === 'primary');
+  const alternativeStandards = filteredStandards.filter(s => s.matchType !== 'primary');
+
+  // Determine explanation reasons based on primary standard
+  const activeReasons = primaryStandards.length > 0 ? primaryStandards[0].matchReasons : 
+                        filteredStandards.length > 0 ? filteredStandards[0].matchReasons : [];
+  const activeEvidence = primaryStandards.length > 0 ? primaryStandards[0].evidenceIds : undefined;
+
   return (
     <div className="space-y-6">
       <PageHeader 
-        title="Applicable Standards" 
-        subtitle="Based on your product description" 
+        title="Standards Discovery" 
+        subtitle="Identify and understand applicable Indian Standards" 
         backTo="/" 
         backLabel="Back to Home"
       />
@@ -93,145 +140,161 @@ export default function Standards() {
           <Card className="p-4 bg-white shadow-sm flex flex-col md:flex-row gap-4">
             <form onSubmit={handleSearch} className="flex-1 flex gap-2">
               <Input 
-                placeholder="Search standards..." 
+                placeholder="Search by product, material, or IS number..." 
                 value={localQuery}
                 onChange={e => setLocalQuery(e.target.value)}
                 className="w-full"
               />
               <Button type="submit" variant="primary">Search</Button>
             </form>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <select 
-                className="h-10 px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="h-10 px-3 py-2 bg-slate-50 border border-slate-300 rounded-md text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={category}
                 onChange={e => setCategory(e.target.value)}
               >
                 <option value="">All Categories</option>
-                <option value="Electrical">Electrical</option>
-                <option value="Household">Household</option>
-                <option value="Food">Food</option>
-                <option value="Construction">Construction</option>
+                <option value="Electrical / Lighting">Electrical / Lighting</option>
+                <option value="Household / Food Contact Articles">Household / Food</option>
+                <option value="Construction / Building Materials">Construction</option>
               </select>
               <select
-                className="h-10 px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                value={status}
-                onChange={e => setStatus(e.target.value)}
+                className="h-10 px-3 py-2 bg-slate-50 border border-slate-300 rounded-md text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={sortParam}
+                onChange={e => setSortParam(e.target.value)}
               >
-                <option value="">All Statuses</option>
-                <option value="Active">Active</option>
-                <option value="Under Revision">Under Revision</option>
-                <option value="Withdrawn">Withdrawn</option>
+                <option value="relevance">Most Relevant</option>
+                <option value="recent">Recently Updated</option>
+                <option value="az">A-Z</option>
+                <option value="number">Standard Number</option>
               </select>
             </div>
           </Card>
 
-          {/* Product Identified Alert */}
-          {identifiedProduct && !isLoading && !error && (
-            <Card className="p-4 border-green-200 bg-green-50 shadow-sm flex items-start gap-4">
-              <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5" />
-              <div className="flex-1">
-                <h3 className="font-semibold text-green-900 mb-1">Product Identified</h3>
-                <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-green-800">
-                  <p><span className="font-medium">Name:</span> {identifiedProduct.name}</p>
-                  <p><span className="font-medium">Category:</span> {identifiedProduct.category}</p>
-                </div>
-              </div>
-              <div className="flex flex-col items-center justify-center bg-white rounded-full w-12 h-12 border-2 border-green-200">
-                <span className="text-xs font-bold text-green-700">{identifiedProduct.confidence}%</span>
+          {isLoading ? (
+            <div className="space-y-4">
+              <SkeletonCard className="h-24" />
+              <SkeletonCard className="h-40" />
+              <SkeletonCard className="h-40" />
+            </div>
+          ) : error ? (
+            <ErrorState 
+              title="Error fetching standards" 
+              description={error.message} 
+              onRetry={() => fetchResults(query)} 
+            />
+          ) : !query ? (
+            <Card className="p-8 border-dashed border-2 border-slate-300 bg-slate-50 text-center">
+              <Search className="w-12 h-12 text-slate-400 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-slate-900 mb-2">Find the right Indian Standard</h3>
+              <p className="text-slate-600 mb-6 max-w-md mx-auto">
+                Describe your product, its material, intended use, or search directly by an IS number.
+              </p>
+              <div className="flex flex-wrap justify-center gap-3">
+                <Button variant="outline" size="sm" onClick={() => navigate('/standards?q=stainless steel water bottle')}>"Stainless steel bottle"</Button>
+                <Button variant="outline" size="sm" onClick={() => navigate('/standards?q=LED bulb')}>"LED bulb"</Button>
+                <Button variant="outline" size="sm" onClick={() => navigate('/standards?q=IS 302')}>"IS 302"</Button>
+                <Button variant="outline" size="sm" onClick={() => navigate('/standards?q=cement')}>"Cement"</Button>
               </div>
             </Card>
-          )}
+          ) : (
+            <div className="space-y-6">
+              
+              {productIdent && (
+                <ProductIdentificationCard 
+                  product={productIdent} 
+                  onUpdate={handleProductUpdate} 
+                />
+              )}
 
-          {/* Results Area */}
-          <div>
-            <h2 className="text-xl font-bold text-slate-900 mb-4">
-              Recommended Standards {filteredStandards.length > 0 && <span className="text-slate-500 font-normal text-lg">({filteredStandards.length})</span>}
-            </h2>
-            
-            {isLoading ? (
-              <div className="space-y-4">
-                <SkeletonCard className="h-40" />
-                <SkeletonCard className="h-40" />
-              </div>
-            ) : error ? (
-              <ErrorState 
-                title="Error fetching standards" 
-                description={error.message} 
-                onRetry={() => fetchResults(query)} 
-              />
-            ) : !query ? (
-              <EmptyState 
-                icon={Search} 
-                title="No search query" 
-                description="Enter a product or standard in the search bar above to begin." 
-              />
-            ) : filteredStandards.length === 0 ? (
-              <EmptyState 
-                icon={Search} 
-                title="No standards found" 
-                description="We couldn't find any standards matching your query and filters. Try adjusting them." 
-              />
-            ) : (
-              <div className="space-y-4">
-                {filteredStandards.map(std => (
-                  <StandardCard key={std.standard.id} standard={std.standard} relevance={std.relevance} />
-                ))}
-              </div>
-            )}
-          </div>
+              {filteredStandards.length === 0 && !productIdent?.isAmbiguous ? (
+                <EmptyState 
+                  icon={Search} 
+                  title="No standards found" 
+                  description="We couldn't find any standards matching your query and filters. Try adjusting them." 
+                />
+              ) : (
+                <>
+                  {primaryStandards.length > 0 && (
+                    <div>
+                      <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center">
+                        Primary Recommendations 
+                        <span className="ml-2 bg-blue-100 text-blue-800 text-xs py-0.5 px-2 rounded-full">{primaryStandards.length}</span>
+                      </h2>
+                      <div className="space-y-4">
+                        {primaryStandards.map(std => (
+                          <StandardCard 
+                            key={std.standard.id} 
+                            standard={std.standard} 
+                            relevance={std.relevance}
+                            relevanceScore={std.relevanceScore}
+                            isBookmarked={isSaved(std.standard.id)}
+                            onBookmark={() => toggleSave(std)}
+                            onViewDetails={() => navigate(`/standards/${std.standard.id}`)}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {alternativeStandards.length > 0 && (
+                    <div className="pt-4 border-t border-slate-200">
+                      <h2 className="text-lg font-bold text-slate-700 mb-4 flex items-center">
+                        Alternative & Related Standards 
+                        <span className="ml-2 bg-slate-100 text-slate-600 text-xs py-0.5 px-2 rounded-full">{alternativeStandards.length}</span>
+                      </h2>
+                      <div className="space-y-4 opacity-90">
+                        {alternativeStandards.map(std => (
+                          <StandardCard 
+                            key={std.standard.id} 
+                            standard={std.standard} 
+                            relevance={std.relevance}
+                            isBookmarked={isSaved(std.standard.id)}
+                            onBookmark={() => toggleSave(std)}
+                            onViewDetails={() => navigate(`/standards/${std.standard.id}`)}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Right Sidebar */}
         <div className="space-y-6">
-          <Card className="p-5 bg-white shadow-sm border-slate-200">
-            <h3 className="font-bold text-slate-900 mb-3">Why these standards?</h3>
-            <ul className="space-y-3 mb-4">
-              <li className="flex gap-2 text-sm text-slate-700">
-                <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
-                <span>Product material matches</span>
-              </li>
-              <li className="flex gap-2 text-sm text-slate-700">
-                <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
-                <span>Intended use matches</span>
-              </li>
-              <li className="flex gap-2 text-sm text-slate-700">
-                <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
-                <span>Technical requirements align</span>
-              </li>
-              <li className="flex gap-2 text-sm text-slate-700">
-                <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
-                <span>Relevant product category</span>
-              </li>
-            </ul>
-            <Button variant="outline" className="w-full text-sm" onClick={() => setShowAnalysisModal(true)}>
-              View Detailed Analysis
-            </Button>
-          </Card>
+          <RelevanceExplanation 
+            matchReasons={activeReasons} 
+            evidenceIds={activeEvidence}
+            onViewDetails={activeReasons.length > 0 ? () => setShowAnalysisModal(true) : undefined}
+          />
 
           <Card className="p-5 bg-indigo-50 border-indigo-100 shadow-sm text-center">
-            <AlertCircle className="w-8 h-8 text-indigo-500 mx-auto mb-3" />
+            <HelpCircle className="w-8 h-8 text-indigo-500 mx-auto mb-3" />
             <h3 className="font-bold text-indigo-900 mb-2">Need Help?</h3>
-            <p className="text-sm text-indigo-700 mb-4">Ask follow-up questions about these standards or certification process.</p>
+            <p className="text-sm text-indigo-700 mb-4">Unsure which standard applies? Ask our intelligent assistant.</p>
             <Button variant="primary" className="w-full bg-indigo-600 hover:bg-indigo-700" onClick={() => navigate('/ask')}>
-              Ask AI Assistant
+              Ask SmartGuide
             </Button>
           </Card>
         </div>
 
       </div>
 
-      <Modal isOpen={showAnalysisModal} onClose={() => setShowAnalysisModal(false)} title="AI Analysis Details">
+      <Modal isOpen={showAnalysisModal} onClose={() => setShowAnalysisModal(false)} title="Detailed AI Analysis">
         <div className="space-y-4">
           <p className="text-sm text-slate-600">Based on your query <span className="font-medium text-slate-900">"{query}"</span>, our AI identified the following mapping:</p>
           <div className="bg-slate-50 p-4 rounded-md border border-slate-200">
             <h4 className="font-semibold text-slate-800 mb-2">Extraction</h4>
             <ul className="list-disc pl-5 text-sm text-slate-700 space-y-1">
-              <li><strong>Product Type:</strong> LED Bulb</li>
-              <li><strong>Application:</strong> General Lighting</li>
-              <li><strong>Certification Context:</strong> Mandatory compliance for sale in India</li>
+              <li><strong>Product Match:</strong> {productIdent?.name}</li>
+              <li><strong>Category:</strong> {productIdent?.category}</li>
+              {productIdent?.intendedUse && <li><strong>Intended Use:</strong> {productIdent?.intendedUse}</li>}
             </ul>
           </div>
-          <p className="text-sm text-slate-600">The recommended standards were selected because they specifically cover the safety and performance requirements for self-ballasted LED lamps intended for general lighting services.</p>
+          <p className="text-sm text-slate-600">The primary recommended standards were selected because their official BIS scope specifically covers these extracted properties. This recommendation is AI-assisted and should be verified against official BIS documentation.</p>
         </div>
       </Modal>
 
