@@ -1,243 +1,289 @@
-import React, { useState } from 'react';
-import { CheckCircle2, ChevronRight, FileText, Settings, FlaskConical, ClipboardList, BookOpen, ShieldCheck } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Clock, IndianRupee } from 'lucide-react';
 import { PageHeader } from '../components/ui/PageHeader';
+import { Breadcrumbs } from '../components/ui/Breadcrumbs';
 import { Card } from '../components/ui/Card';
-import { Button } from '../components/ui/Button';
+import { ErrorState } from '../components/ui/ErrorState';
+import { SkeletonCard } from '../components/ui/LoadingSkeleton';
 import { CertificationStepper } from '../components/common/CertificationStepper';
-import { SourceList } from '../components/common/SourceList';
-import { Badge } from '../components/ui/Badge';
-import { Modal } from '../components/ui/Modal';
-import { cn } from '../utils/helpers';
+import {
+  CertificationContextBar,
+  ChecklistPanel,
+  JourneyStageDetail,
+  NeedHelpPanel,
+  OfficialSourcesPanel,
+  ProgressPanel,
+  RequirementVerdictCard,
+  SchemeCard,
+  StartContextPanel,
+  WarningsPanel
+} from '../components/certification';
+import { getCertificationPlan } from '../services/certificationService';
+import { useTranslation } from '../hooks/useTranslation';
+import { CertificationPlan, CertificationStep, ManufacturingLocation } from '../types';
 
+/**
+ * Certification Guide.
+ *
+ * The page is contextual: it takes the product/standard the user already chose earlier in
+ * their journey (`?standardId=`, `?product=`) and builds the plan around it. With no
+ * context it asks for the product instead of printing certification steps for an imagined
+ * one. The seven-stage stepper is a navigation model only — the content inside each stage
+ * comes from the scheme and the standard, via `getCertificationPlan`.
+ */
 export default function Certification() {
   const navigate = useNavigate();
-  const [activeStep, setActiveStep] = useState(0);
-  const [isQcoModalOpen, setIsQcoModalOpen] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { t } = useTranslation();
 
-  // Hardcoded steps based on requirement
-  const steps = [
-    { id: '1', title: 'Identify Standard', status: activeStep > 0 ? 'completed' : 'current' },
-    { id: '2', title: 'Check Requirement', status: activeStep > 1 ? 'completed' : activeStep === 1 ? 'current' : 'upcoming' },
-    { id: '3', title: 'Prepare', status: activeStep > 2 ? 'completed' : activeStep === 2 ? 'current' : 'upcoming' },
-    { id: '4', title: 'Testing', status: activeStep > 3 ? 'completed' : activeStep === 3 ? 'current' : 'upcoming' },
-    { id: '5', title: 'Application', status: activeStep > 4 ? 'completed' : activeStep === 4 ? 'current' : 'upcoming' },
-    { id: '6', title: 'Assessment', status: activeStep > 5 ? 'completed' : activeStep === 5 ? 'current' : 'upcoming' },
-    { id: '7', title: 'Certification', status: activeStep > 6 ? 'completed' : activeStep === 6 ? 'current' : 'upcoming' },
-  ];
+  const standardId = searchParams.get('standardId') ?? undefined;
+  // `q` is accepted so a hand-off from search still lands with context; it is read here
+  // only as a product hint and never written back to any shared search state.
+  const product = searchParams.get('product') ?? searchParams.get('q') ?? undefined;
+  const category = searchParams.get('category') ?? undefined;
+  const stepParam = Number(searchParams.get('step') ?? '1');
 
-  const handleNext = () => {
-    if (activeStep < steps.length - 1) setActiveStep(activeStep + 1);
+  const [plan, setPlan] = useState<CertificationPlan | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
+  const [location, setLocation] = useState<ManufacturingLocation>('india');
+
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [completedStageKeys, setCompletedStageKeys] = useState<string[]>([]);
+  const [checkedItems, setCheckedItems] = useState<string[]>([]);
+
+  const loadPlan = useCallback(() => {
+    let cancelled = false;
+    setIsLoading(true);
+    setHasError(false);
+
+    getCertificationPlan({ standardId, product, category, location })
+      .then((result) => {
+        if (cancelled) return;
+        setPlan(result);
+        // Progress is per-plan: a different product is a different journey.
+        setCompletedStageKeys([]);
+        setCheckedItems([]);
+        setActiveIndex(
+          Number.isFinite(stepParam) && stepParam >= 1 && stepParam <= result.stages.length ? stepParam - 1 : 0
+        );
+      })
+      .catch(() => {
+        if (!cancelled) setHasError(true);
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+    // stepParam is read once per load on purpose; step changes are handled locally below.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [standardId, product, category, location]);
+
+  useEffect(loadPlan, [loadPlan]);
+
+  const stages = useMemo(() => plan?.stages ?? [], [plan]);
+  const activeStage = stages[activeIndex];
+
+  const stepperSteps = useMemo<CertificationStep[]>(
+    () =>
+      stages.map((stage, index) => ({
+        step: stage.step,
+        title: stage.title,
+        description: stage.plainQuestion,
+        checklist: stage.checklist,
+        documents: stage.documents,
+        status: completedStageKeys.includes(stage.key)
+          ? 'completed'
+          : index === activeIndex
+            ? 'current'
+            : 'upcoming'
+      })),
+    [stages, completedStageKeys, activeIndex]
+  );
+
+  const completedIndexes = useMemo(
+    () => stages.map((stage, index) => (completedStageKeys.includes(stage.key) ? index : -1)).filter((i) => i >= 0),
+    [stages, completedStageKeys]
+  );
+
+  const goToStep = (index: number) => {
+    if (index < 0 || index >= stages.length) return;
+    setActiveIndex(index);
+    const next = new URLSearchParams(searchParams);
+    next.set('step', String(index + 1));
+    setSearchParams(next, { replace: true });
   };
 
-  const handlePrev = () => {
-    if (activeStep > 0) setActiveStep(activeStep - 1);
+  const toggleStageComplete = () => {
+    if (!activeStage) return;
+    setCompletedStageKeys((prev) =>
+      prev.includes(activeStage.key) ? prev.filter((k) => k !== activeStage.key) : [...prev, activeStage.key]
+    );
   };
 
-  return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="mb-6 flex items-center text-sm text-gray-500 space-x-2">
-        <Link to="/" className="hover:text-blue-900 transition-colors">Home</Link>
-        <ChevronRight className="w-4 h-4" />
-        <span className="text-gray-900 font-medium">Certification</span>
-      </div>
+  const toggleChecklistItem = (itemId: string) => {
+    setCheckedItems((prev) => (prev.includes(itemId) ? prev.filter((i) => i !== itemId) : [...prev, itemId]));
+  };
 
-      <PageHeader 
-        title="Certification Guide"
-        subtitle="Process to get BIS certification for your product"
+  const handleDescribeProduct = (value: string) => {
+    navigate(`/certification?product=${encodeURIComponent(value)}`);
+  };
+
+  const handleChangeProduct = () => {
+    navigate('/certification');
+  };
+
+  const contextQuery = plan?.context.standard
+    ? `${plan.context.standard.standardNumber} certification`
+    : plan?.context.productName
+      ? `${plan.context.productName} BIS certification`
+      : undefined;
+
+  const stageWarnings = activeStage?.warnings ?? [];
+  const allWarnings = [...(plan?.warnings ?? []), ...stageWarnings];
+
+  const header = (
+    <>
+      <Breadcrumbs
+        items={[
+          { label: t('certification.breadcrumbHome'), href: '/' },
+          { label: t('certification.breadcrumbCurrent') }
+        ]}
       />
+      <PageHeader title={t('certification.title')} subtitle={t('certification.subtitle')} />
+    </>
+  );
 
-      <div className="mt-8 bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-        <CertificationStepper 
-          steps={steps as any} 
-          activeStep={activeStep} 
-          onStepClick={(index) => setActiveStep(index)} 
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        {header}
+        <SkeletonCard />
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+          <div className="space-y-6 lg:col-span-2">
+            <SkeletonCard />
+            <SkeletonCard />
+          </div>
+          <SkeletonCard />
+        </div>
+      </div>
+    );
+  }
+
+  if (hasError || !plan) {
+    return (
+      <div className="space-y-6">
+        {header}
+        <ErrorState
+          title={t('certification.errorTitle')}
+          description={t('certification.errorDesc')}
+          onRetry={loadPlan}
         />
       </div>
+    );
+  }
 
-      <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-6">
-          <Card className="p-6">
-            {activeStep === 0 && (
-              <div className="space-y-6">
-                <div className="flex items-center space-x-3 text-blue-900">
-                  <BookOpen className="w-6 h-6" />
-                  <h2 className="text-xl font-bold">Step 1: Identify Standard</h2>
-                </div>
-                <p className="text-gray-600">You have identified the applicable standard for your product.</p>
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-start space-x-3">
-                  <CheckCircle2 className="w-5 h-5 text-green-600 mt-0.5" />
-                  <div>
-                    <h3 className="font-semibold text-green-900">Applicable Standard</h3>
-                    <p className="text-green-800 text-sm">IS 17803:2022 - Stainless Steel Vacuum Insulated Flask</p>
-                  </div>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-gray-900 mb-2">Next Steps</h4>
-                  <p className="text-gray-600 text-sm">Check whether BIS certification is mandatory or voluntary for your product based on applicable government orders and regulations.</p>
-                </div>
-              </div>
-            )}
+  // No standard means no honest answer on requirement, scheme or tests — so ask for the
+  // product instead of showing certification information we cannot stand behind.
+  if (!plan.context.standard) {
+    return (
+      <div className="space-y-6">
+        {header}
+        <StartContextPanel
+          productName={plan.context.productName}
+          suggestedStandards={plan.context.suggestedStandards}
+          onDescribeProduct={handleDescribeProduct}
+        />
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+          <div className="lg:col-span-2">
+            {/* No step detail is shown in this state, so list every source in full. */}
+            <OfficialSourcesPanel sourceIds={plan.sourceIds} limit={plan.sourceIds.length} />
+          </div>
+          <NeedHelpPanel contextQuery={contextQuery} />
+        </div>
+      </div>
+    );
+  }
 
-            {activeStep === 1 && (
-              <div className="space-y-6">
-                <div className="flex items-center space-x-3 text-blue-900">
-                  <ClipboardList className="w-6 h-6" />
-                  <h2 className="text-xl font-bold">Step 2: Check Requirement</h2>
-                </div>
-                <p className="text-gray-600">Ensure all preliminary checks are completed before proceeding.</p>
-                <ul className="space-y-3">
-                  <li className="flex items-center space-x-3 text-sm text-gray-700">
-                    <CheckCircle2 className="w-5 h-5 text-green-500" /> <span>Identify applicable standard</span>
-                  </li>
-                  <li className="flex items-center space-x-3 text-sm text-gray-700">
-                    <CheckCircle2 className="w-5 h-5 text-green-500" /> <span>Check whether a QCO applies</span>
-                  </li>
-                  <li className="flex items-center space-x-3 text-sm text-gray-700">
-                    <CheckCircle2 className="w-5 h-5 text-green-500" /> <span>Check product-specific certification information</span>
-                  </li>
-                </ul>
-              </div>
-            )}
+  return (
+    <div className="space-y-6">
+      {header}
 
-            {activeStep === 2 && (
-              <div className="space-y-6">
-                <div className="flex items-center space-x-3 text-blue-900">
-                  <Settings className="w-6 h-6" />
-                  <h2 className="text-xl font-bold">Step 3: Prepare</h2>
-                </div>
-                <p className="text-gray-600">Gather necessary documents and ensure your manufacturing unit is ready.</p>
-                <ul className="list-disc pl-5 space-y-2 text-sm text-gray-700">
-                  <li>Manufacturing information</li>
-                  <li>Quality control capabilities</li>
-                  <li>Testing capability</li>
-                  <li>Required documents (Company registration, manufacturing process flow, etc.)</li>
-                </ul>
-                <div className="bg-blue-50 p-4 rounded-lg mt-4">
-                  <h4 className="font-semibold text-blue-900 mb-2">Documents Needed</h4>
-                  <p className="text-sm text-blue-800">Business License, Layout Plan, List of Machinery, Details of QC Staff.</p>
-                </div>
-              </div>
-            )}
+      <CertificationContextBar
+        context={plan.context}
+        location={location}
+        onLocationChange={setLocation}
+        onChangeProduct={handleChangeProduct}
+      />
 
-            {activeStep === 3 && (
-              <div className="space-y-6">
-                <div className="flex items-center space-x-3 text-blue-900">
-                  <FlaskConical className="w-6 h-6" />
-                  <h2 className="text-xl font-bold">Step 4: Testing</h2>
-                </div>
-                <p className="text-gray-600">Product samples must be tested in a BIS recognized laboratory.</p>
-                <ul className="list-disc pl-5 space-y-2 text-sm text-gray-700 mb-6">
-                  <li>Identify applicable tests from the standard</li>
-                  <li>Find a BIS-recognized testing laboratory</li>
-                  <li>Get product samples tested</li>
-                  <li>Obtain test report</li>
-                </ul>
-                <Button onClick={() => navigate('/labs')}>Find Testing Labs</Button>
-              </div>
-            )}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="space-y-6 lg:col-span-2">
+          <RequirementVerdictCard requirement={plan.requirement} />
 
-            {activeStep === 4 && (
-              <div className="space-y-6">
-                <div className="flex items-center space-x-3 text-blue-900">
-                  <FileText className="w-6 h-6" />
-                  <h2 className="text-xl font-bold">Step 5: Application</h2>
-                </div>
-                <p className="text-gray-600">Submit your application via the official BIS portal.</p>
-                <ul className="list-disc pl-5 space-y-2 text-sm text-gray-700">
-                  <li>Complete BIS application form</li>
-                  <li>Attach required documents</li>
-                  <li>Pay application fees</li>
-                  <li>Submit online via BIS portal</li>
-                </ul>
-                <div className="mt-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
-                  <p className="text-sm text-gray-600 italic">Note: Application fees vary depending on the product category and standard.</p>
-                </div>
-              </div>
-            )}
+          <SchemeCard scheme={plan.scheme} confidence={plan.schemeConfidence} reason={plan.schemeReason} />
 
-            {activeStep === 5 && (
-              <div className="space-y-6">
-                <div className="flex items-center space-x-3 text-blue-900">
-                  <ShieldCheck className="w-6 h-6" />
-                  <h2 className="text-xl font-bold">Step 6: Assessment</h2>
-                </div>
-                <p className="text-gray-600">BIS officials will review your application and inspect your factory.</p>
-                <ul className="list-disc pl-5 space-y-2 text-sm text-gray-700">
-                  <li>Factory inspection</li>
-                  <li>Quality system evaluation</li>
-                  <li>Product sample testing</li>
-                  <li>Compliance verification</li>
-                </ul>
-              </div>
-            )}
-
-            {activeStep === 6 && (
-              <div className="space-y-6">
-                <div className="flex items-center space-x-3 text-blue-900">
-                  <CheckCircle2 className="w-6 h-6" />
-                  <h2 className="text-xl font-bold">Step 7: Certification</h2>
-                </div>
-                <p className="text-gray-600">Once approved, you will be granted a licence to use the Standard Mark.</p>
-                <ul className="list-disc pl-5 space-y-2 text-sm text-gray-700">
-                  <li>Receive BIS licence</li>
-                  <li>Use ISI mark on products</li>
-                  <li>Comply with ongoing surveillance</li>
-                  <li>Renew licence periodically</li>
-                </ul>
-                <div className="mt-6 p-4 bg-green-50 border border-green-200 text-green-800 rounded-lg font-medium text-center">
-                  Success! You have reviewed all steps of the certification process.
-                </div>
-              </div>
-            )}
-            
-            <div className="mt-8 flex justify-between items-center pt-6 border-t border-gray-100">
-              <Button variant="outline" onClick={handlePrev} disabled={activeStep === 0}>
-                Previous Step
-              </Button>
-              <Button onClick={handleNext} disabled={activeStep === steps.length - 1}>
-                Next Step
-              </Button>
+          <Card className="p-4">
+            <div className="mb-2 px-2">
+              <h2 className="text-sm font-bold text-gray-900">{t('certification.journeyTitle')}</h2>
+              <p className="text-xs text-gray-600">{t('certification.journeyHint')}</p>
             </div>
+            <CertificationStepper
+              steps={stepperSteps}
+              activeStep={activeIndex}
+              completedSteps={completedIndexes}
+              onStepClick={goToStep}
+            />
+            {(plan.timeline || plan.fees) && (
+              <div className="mt-2 flex flex-wrap gap-x-6 gap-y-2 border-t border-gray-100 px-2 pt-3 text-xs text-gray-600">
+                {plan.timeline && (
+                  <span className="flex items-center gap-1.5">
+                    <Clock className="h-3.5 w-3.5 text-gray-400" />
+                    {t('certification.indicativeTimeline')}{' '}
+                    <span className="font-medium text-gray-900">{plan.timeline}</span>
+                  </span>
+                )}
+                {plan.fees && (
+                  <span className="flex items-center gap-1.5">
+                    <IndianRupee className="h-3.5 w-3.5 text-gray-400" />
+                    {t('certification.indicativeCost')} <span className="font-medium text-gray-900">{plan.fees}</span>
+                  </span>
+                )}
+                <span className="text-gray-500">{t('certification.estimateNote')}</span>
+              </div>
+            )}
           </Card>
+
+          {activeStage && (
+            <JourneyStageDetail
+              stage={activeStage}
+              totalStages={stages.length}
+              isComplete={completedStageKeys.includes(activeStage.key)}
+              onPrev={activeIndex > 0 ? () => goToStep(activeIndex - 1) : undefined}
+              onNext={activeIndex < stages.length - 1 ? () => goToStep(activeIndex + 1) : undefined}
+              onToggleComplete={toggleStageComplete}
+            />
+          )}
         </div>
 
         <div className="space-y-6">
-          <Card className="p-6 border-l-4 border-l-orange-500 border-t border-r border-b border-gray-100">
-            <h3 className="text-lg font-bold text-gray-900 mb-2">Is Certification Mandatory?</h3>
-            <p className="text-sm text-gray-600 mb-4">
-              BIS certification is generally voluntary. However, certain products are made mandatory through Government Orders (QCOs). Please check the latest QCO list or consult BIS for your product category.
-            </p>
-            <Button variant="outline" className="w-full text-orange-600 border-orange-200 hover:bg-orange-50" onClick={() => setIsQcoModalOpen(true)}>
-              Check QCO List
-            </Button>
-          </Card>
-          
-          <div className="pt-4">
-            <h4 className="text-sm font-semibold text-gray-900 mb-3 uppercase tracking-wider">Helpful Resources</h4>
-            <SourceList 
-              sources={[
-                { id: '1', title: 'BIS Conformity Assessment', type: 'regulation', url: '#', documentName: 'Scheme I' },
-                { id: '2', title: 'Product Manual for IS 17803', type: 'guideline', url: '#', documentName: 'PM/17803' }
-              ]} 
-            />
-          </div>
+          <ProgressPanel
+            stages={stages}
+            activeIndex={activeIndex}
+            completed={completedStageKeys}
+            onSelect={goToStep}
+          />
+          {activeStage && (
+            <ChecklistPanel stage={activeStage} checkedItems={checkedItems} onToggle={toggleChecklistItem} />
+          )}
+          <WarningsPanel warnings={allWarnings} />
+          <OfficialSourcesPanel sourceIds={plan.sourceIds} />
+          <NeedHelpPanel contextQuery={contextQuery} />
         </div>
       </div>
-
-      <Modal isOpen={isQcoModalOpen} onClose={() => setIsQcoModalOpen(false)} title="Quality Control Orders (QCO)">
-        <div className="p-4">
-          <p className="text-gray-700 mb-4">
-            Quality Control Orders (QCOs) are issued by the Government of India to make BIS certification mandatory for specific products in the public interest.
-          </p>
-          <p className="text-sm text-gray-500">
-            This is a placeholder for the QCO list integration.
-          </p>
-          <div className="mt-6 flex justify-end">
-            <Button onClick={() => setIsQcoModalOpen(false)}>Close</Button>
-          </div>
-        </div>
-      </Modal>
     </div>
   );
 }

@@ -89,6 +89,132 @@ export interface CertificationStep {
 }
 
 // Laboratory types
+// Certification Guide 2.0 — contextual, scheme-aware certification planning.
+// These types are additive: CertificationGuide/CertificationStep above stay unchanged
+// so the existing mock service and API contract keep working.
+
+/** Conformity assessment schemes BIS operates. */
+export type SchemeCode =
+  | 'scheme-i'
+  | 'scheme-ii'
+  | 'scheme-iv'
+  | 'scheme-x'
+  | 'fmcs'
+  | 'hallmarking';
+
+/**
+ * Whether certification is legally required. `needs-verification` is a first-class
+ * answer — it is shown instead of guessing when the applicable QCO is not confirmed.
+ */
+export type RequirementVerdict = 'mandatory' | 'voluntary' | 'needs-verification';
+
+/** How strongly a piece of guidance is backed: quoted from BIS, derived, or unknown. */
+export type ConfidenceLevel = 'confirmed' | 'inferred' | 'unknown';
+
+export interface SchemeFact {
+  label: string;
+  value: string;
+  sourceId: string;
+}
+
+export interface CertificationScheme {
+  code: SchemeCode;
+  /** Official name, e.g. "Scheme-I (ISI Mark)". */
+  name: string;
+  /** Same thing without jargon, for a manufacturer reading this for the first time. */
+  plainName: string;
+  markName: string;
+  legalBasis: string;
+  appliesTo: string;
+  inPlainWords: string;
+  howItWorks: string[];
+  keyFacts: SchemeFact[];
+  applyPortalUrl: string;
+  applyPortalLabel: string;
+  productListUrl?: string;
+  /** Internal route to hand off to instead of applying here (e.g. hallmarking). */
+  internalRoute?: string;
+  sourceIds: string[];
+}
+
+export interface GlossaryTerm {
+  key: string;
+  term: string;
+  expansion?: string;
+  plain: string;
+  sourceId?: string;
+}
+
+export interface CertificationStageAction {
+  label: string;
+  /** Internal app route. */
+  to?: string;
+  /** Official external URL. */
+  href?: string;
+}
+
+export interface CertificationJourneyStage {
+  key: string;
+  step: number;
+  title: string;
+  /** The question a manufacturer would actually ask at this stage. */
+  plainQuestion: string;
+  whyItMatters: string;
+  description: string;
+  checklist: string[];
+  documents: string[];
+  actions: CertificationStageAction[];
+  warnings: string[];
+  facts: SchemeFact[];
+  sourceIds: string[];
+  confidence: ConfidenceLevel;
+}
+
+export interface CertificationRequirement {
+  verdict: RequirementVerdict;
+  headline: string;
+  reason: string;
+  qcoNote?: string;
+  verifyUrl: string;
+  verifyLabel: string;
+  sourceIds: string[];
+}
+
+export interface CertificationContext {
+  /** Where the product/standard context came from in the user's journey. */
+  origin: 'standard' | 'product' | 'none';
+  standard?: Standard;
+  productName?: string;
+  productCategory?: string;
+  suggestedStandards?: StandardRecommendation[];
+}
+
+/** Where the manufacturing unit is — decides domestic schemes vs FMCS. */
+export type ManufacturingLocation = 'india' | 'outside-india';
+
+export interface CertificationPlanRequest {
+  standardId?: string;
+  product?: string;
+  category?: string;
+  location?: ManufacturingLocation;
+}
+
+export interface CertificationPlan {
+  context: CertificationContext;
+  requirement: CertificationRequirement;
+  scheme?: CertificationScheme;
+  schemeConfidence: ConfidenceLevel;
+  /** Plain-language explanation of how the scheme above was arrived at. */
+  schemeReason: string;
+  stages: CertificationJourneyStage[];
+  timeline?: string;
+  fees?: string;
+  /** Id of the curated CertificationGuide whose steps enriched this plan, if any. */
+  curatedGuideId?: string;
+  warnings: string[];
+  sourceIds: string[];
+}
+
 export interface Laboratory {
   id: string;
   name: string;
