@@ -1,189 +1,47 @@
-# BIS SmartGuide
+# BIS SmartGuide - AI Standards & Certification Assistant
 
-**AI-powered Intelligent Assistant for Indian Standards and BIS Services**
-
-> Smart India Hackathon 2026 — Problem Statement SIH26107
-
-## Overview
-
-BIS SmartGuide is an AI-powered intelligent assistant that helps industries and consumers navigate Indian Standards, BIS certification processes, testing requirements, hallmarking, and more. The application provides a unified platform for discovering applicable standards, understanding certification workflows, finding testing laboratories, and getting AI-assisted guidance.
-
-## Problem Statement
-
-SIH26107 — AI-powered Intelligent Assistant for Indian Standards and BIS Services for Industries and Consumers.
-
-The system helps users:
-- Find applicable Indian Standards for their products
-- Get AI-powered standard recommendations based on product descriptions
-- Understand BIS certification schemes and processes
-- Find BIS-recognized testing laboratories
-- Verify HUID for hallmarked jewellery
-- Get answers to consumer-related BIS questions
-- Interact in multiple languages (English, Hindi, Gujarati)
-- Receive source-backed answers from authorized BIS knowledge sources
+Official repository for **SIH26107 — AI-powered Intelligent Assistant for Indian Standards and BIS Services for Industries and Consumers.**
 
 ## Features
+- Search and recommend applicable Indian Standards.
+- Certification scheme guidance and document uploads.
+- Testing Laboratory directory.
+- Interactive AI Assistant powered by RAG.
+- Complete English/Hindi localization.
 
-### Core Features
-- **Smart Standard Search**: Describe your product in natural language and find applicable Indian Standards
-- **AI Assistant**: Ask BIS-related questions and get structured, source-backed answers
-- **Certification Guide**: Step-by-step certification process with checklists and requirements
-- **Testing Laboratories**: Find BIS-recognized labs with filters by location and standard
-- **Hallmarking**: Verify HUID numbers and learn about hallmarking processes
-- **Consumer Help**: Get help with BIS-related consumer queries and complaints
-- **Document Analysis**: Upload product documents for automatic standard identification
-- **Multi-language Support**: English, Hindi, and Gujarati interface
+## Tech Stack
+- **Frontend:** React, TypeScript, Vite, Tailwind CSS, Zustand
+- **Backend:** (Upcoming)
+- **AI/RAG:** (Upcoming)
 
-### Architecture Features
-- Service abstraction layer (mock → real API swap)
-- Structured AI response format (ready for RAG/LLM integration)
-- Source citation system for every recommendation
-- Strong TypeScript typing throughout
-- Responsive design (desktop, tablet, mobile)
+## Project Structure
+- `src/`: Frontend React Application
+- `docs/`: API Contracts, Architecture, and Database Schemas
+- `backend/`: Future API implementations
+- `ai/`: Future RAG and LLM pipelines
+- `data/`: Knowledge base schemas and scripts
 
-## Screens
+## Local Setup
+1. Clone the repository: `git clone https://github.com/NIshantverma-MAX/sih2026.git`
+2. Install dependencies: `npm install`
+3. Set up environment: `cp .env.example .env`
+4. Run development server: `npm run dev`
 
-| Screen | Route | Description |
-|--------|-------|-------------|
-| Home | `/` | Landing page with search, services, and quick actions |
-| Standards | `/standards` | Search and filter applicable standards |
-| Standard Details | `/standards/:id` | Detailed view of a specific standard |
-| Certification Guide | `/certification` | 7-step certification process |
-| Testing Labs | `/labs` | Find BIS-recognized testing laboratories |
-| Lab Details | `/labs/:id` | Detailed laboratory information |
-| Hallmarking | `/hallmarking` | HUID verification and hallmarking info |
-| Consumer Help | `/consumer-help` | Consumer queries and FAQ |
-| Ask SmartGuide | `/ask` | AI assistant chat interface |
-| My Queries | `/my-queries` | Query history |
-| Saved Items | `/saved-items` | Bookmarked standards, labs, queries |
-| Upload Document | `/upload-document` | Document upload and analysis |
-| Settings | `/settings` | User preferences and configuration |
-| Login | `/login` | User authentication |
-| Register | `/register` | Account creation |
-| Dashboard | `/dashboard` | User dashboard |
+*(Note: Currently uses Mock APIs. Real backend instructions will be added here once integrated.)*
 
-## Technology Stack
+## Team Workflow & Git Guidelines
+We follow a strict PR-based workflow to keep the `main` branch stable.
 
-| Technology | Purpose |
-|------------|--------|
-| React 18 | UI framework |
-| TypeScript | Type safety |
-| Vite | Build tool |
-| Tailwind CSS | Styling |
-| React Router v6 | Routing |
-| Zustand | State management |
-| Lucide React | Icons |
-| Recharts | Charts |
-| React Hook Form | Form handling |
-| Zod | Validation |
-| react-hot-toast | Notifications |
+1. **Pull Latest Main:** `git switch main && git pull --ff-only origin main`
+2. **Create Feature Branch:** `git switch -c frontend/your-feature-name`
+   - Use clear prefixes: `frontend/`, `backend/`, `ai/`, `data/`, `fix/`, `docs/`.
+3. **Commit Small Changes:** Follow conventional commits (`feat:`, `fix:`, `refactor:`, `docs:`).
+4. **Push Branch:** `git push -u origin frontend/your-feature-name`
+5. **Open a Pull Request:** Fill out the PR template.
+6. **Pass CI & Review:** Ensure tests, linting, and build pass before merging.
 
-## Folder Structure
-
-```
-src/
-├── assets/          # Static assets
-├── components/
-│   ├── ui/          # Reusable UI components (Button, Card, Modal, etc.)
-│   └── common/      # Domain-specific components (StandardCard, etc.)
-├── contexts/        # React contexts (if needed)
-├── data/            # Mock data files
-├── features/        # Feature modules
-├── hooks/           # Custom React hooks
-├── layouts/         # App layout components
-├── lib/             # Store and library configuration
-├── locales/         # i18n translation files
-├── pages/           # Page components
-├── routes/          # Router configuration
-├── services/        # Service layer (mock → API)
-├── types/           # TypeScript interfaces
-└── utils/           # Utility functions
-```
-
-## Getting Started
-
-### Prerequisites
-- Node.js 18+
-- npm 9+
-
-### Installation
-
-```bash
-# Clone the repository
-git clone <repository-url>
-cd bis-smartguide
-
-# Install dependencies
-npm install
-
-# Start development server
-npm run dev
-```
-
-The app will be available at `http://localhost:5173`.
-
-### Build for Production
-
-```bash
-npm run build
-npm run preview
-```
-
-## Mock Services
-
-All data is currently served through mock services in `src/services/`. Each service follows a consistent pattern:
-
-```typescript
-// Current: Mock implementation
-export async function searchStandards(query: string): Promise<StandardRecommendation[]> {
-  await delay(1000); // Simulated latency
-  return mockStandards.filter(...);
-}
-
-// Future: Replace with real API
-export async function searchStandards(query: string): Promise<StandardRecommendation[]> {
-  const response = await fetch(`${API_BASE_URL}/standards?q=${query}`);
-  return response.json();
-}
-```
-
-### Replacing Mock Services with Real APIs
-
-1. Update `.env` with your API base URL
-2. Modify service files in `src/services/` to call real endpoints
-3. No page component changes needed — the service interface stays the same
-
-## Environment Variables
-
-Copy `.env.example` to `.env`:
-
-```bash
-cp .env.example .env
-```
-
-See `.env.example` for available configuration options.
-
-## Future Architecture
-
-### Backend Integration
-See `docs/API_CONTRACT.md` for expected backend endpoints.
-
-### Database Design
-See `docs/DATABASE_SCHEMA.md` for future database architecture.
-
-### AI/RAG Integration
-See `docs/AI_CONTRACT.md` for structured AI response format.
-
-## Deployment
-
-```bash
-# Build
-npm run build
-
-# The dist/ folder contains static files ready for deployment
-# Deploy to any static hosting: Vercel, Netlify, Firebase Hosting, etc.
-```
-
-## License
-
-This project is developed as part of the Smart India Hackathon 2026.
+### Important Rules
+- **NEVER** push directly to `main`.
+- **NEVER** commit secrets, `.env` files, API keys, or large generated AI datasets.
+- Keep the frontend architecture separated from backend implementations using the `src/services/` abstraction layer.
+- Preserve search state separation (Global, Hero, Standards).
