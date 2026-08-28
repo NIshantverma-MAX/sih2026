@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, ExternalLink, BookmarkPlus, BookmarkMinus, CheckCircle, FileText } from 'lucide-react';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { ArrowLeft, CheckCircle, BookmarkPlus, BookmarkMinus, FileText, ExternalLink, ShieldCheck, Microscope, MessageSquare, AlertTriangle } from 'lucide-react';
 import { useAppStore } from '../lib/store';
-import { getStandard, getRelatedStandards } from "../services/standardsService";
+import { getStandard, getRelatedStandards, getLatestVersion } from '../services/standardsService';
 import { Standard } from '../types';
-import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
+import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
 import { Tabs } from '../components/ui/Tabs';
-import { SkeletonCard } from "../components/ui/LoadingSkeleton";
+import { SkeletonCard } from '../components/ui/LoadingSkeleton';
 import { ErrorState } from '../components/ui/ErrorState';
-import { StandardCard } from '../components/common/StandardCard';
 import { SourceList } from '../components/common/SourceList';
 import { sources as mockSources } from "../data/sources";
 import { formatDate } from '../utils/helpers';
@@ -22,6 +21,8 @@ export default function StandardDetails() {
   
   const [standard, setStandard] = useState<Standard | null>(null);
   const [relatedStandards, setRelatedStandards] = useState<Standard[]>([]);
+  const [latestVersion, setLatestVersion] = useState<Standard | null>(null);
+  
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
@@ -33,12 +34,14 @@ export default function StandardDetails() {
       setIsLoading(true);
       setError(null);
       try {
-        const [stdData, relatedData] = await Promise.all([
+        const [stdData, relatedData, latestData] = await Promise.all([
           getStandard(id),
-          getRelatedStandards(id)
+          getRelatedStandards(id),
+          getLatestVersion(id)
         ]);
         setStandard(stdData || null);
         setRelatedStandards(relatedData);
+        setLatestVersion(latestData);
       } catch (err) {
         setError(err instanceof Error ? err : new Error('Standard not found'));
       } finally {
@@ -89,13 +92,8 @@ export default function StandardDetails() {
           <h3 className="text-lg font-semibold text-slate-900">Scope</h3>
           <p className="text-slate-700 leading-relaxed">{standard.description}</p>
           <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 mt-6">
-            <h4 className="font-medium text-slate-900 mb-2">Key Areas Covered:</h4>
-            <ul className="list-disc pl-5 space-y-1 text-slate-700">
-              <li>General safety requirements</li>
-              <li>Performance testing methodology</li>
-              <li>Marking and labelling instructions</li>
-              <li>Sampling plans for acceptance</li>
-            </ul>
+            <h4 className="font-medium text-slate-900 mb-2">Technical Scope:</h4>
+            <p className="text-slate-700">{standard.scope}</p>
           </div>
         </div>
       )
@@ -105,14 +103,18 @@ export default function StandardDetails() {
       label: 'Key Requirements',
       content: (
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-slate-900">Mandatory Requirements</h3>
+          <h3 className="text-lg font-semibold text-slate-900">Extracted Requirements</h3>
           <ul className="space-y-3">
-            {[1, 2, 3, 4].map((i) => (
-              <li key={i} className="flex items-start gap-3">
-                <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-                <span className="text-slate-700">Detailed requirement {i} extracted from the standard documentation regarding safety and compliance.</span>
-              </li>
-            ))}
+            {standard.keyRequirements?.length > 0 ? (
+              standard.keyRequirements.map((req, i) => (
+                <li key={i} className="flex items-start gap-3">
+                  <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
+                  <span className="text-slate-700">{req}</span>
+                </li>
+              ))
+            ) : (
+              <li className="text-slate-500 italic">No specific requirements extracted for this prototype.</li>
+            )}
           </ul>
         </div>
       )
@@ -128,13 +130,32 @@ export default function StandardDetails() {
         <ArrowLeft className="w-4 h-4 mr-1" /> Back to Results
       </button>
 
+      {latestVersion && (
+        <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <AlertTriangle className="w-5 h-5 text-blue-600" />
+            <div>
+              <p className="text-sm font-semibold text-blue-900">A newer version of this standard is available.</p>
+              <p className="text-xs text-blue-700">This standard is currently under revision.</p>
+            </div>
+          </div>
+          <Button variant="outline" size="sm" className="bg-white" onClick={() => navigate(`/standards/${latestVersion.id}`)}>
+            View Latest Version
+          </Button>
+        </div>
+      )}
+
       <div className="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-slate-200">
-        <div className="flex flex-col md:flex-row justify-between items-start gap-4 mb-4">
+        <div className="flex flex-col md:flex-row justify-between items-start gap-4 mb-6">
           <div>
-            <div className="flex items-center gap-3 mb-2">
+            <div className="flex flex-wrap items-center gap-3 mb-2">
               <h1 className="text-3xl font-bold text-slate-900">{standard.standardNumber}</h1>
-              {standard.status === 'active' && <Badge variant="success">Active</Badge>}
-              {standard.certificationStatus === 'mandatory' && <Badge variant="warning">Mandatory Certification</Badge>}
+              <Badge variant={standard.status === 'active' ? 'success' : standard.status === 'withdrawn' ? 'error' : 'warning'}>
+                {standard.status.toUpperCase()}
+              </Badge>
+              <Badge variant={standard.certificationStatus === 'mandatory' ? 'warning' : 'info'}>
+                {standard.certificationStatus === 'mandatory' ? 'MANDATORY CERTIFICATION' : 'VOLUNTARY CERTIFICATION'}
+              </Badge>
             </div>
             <h2 className="text-xl text-slate-700 font-medium">{standard.title}</h2>
           </div>
@@ -144,10 +165,43 @@ export default function StandardDetails() {
             onClick={toggleSave}
           >
             {saved ? (
-              <><BookmarkMinus className="w-4 h-4 mr-2" /> Remove Bookmark</>
+              <><BookmarkMinus className="w-4 h-4 mr-2 text-blue-600" /> Saved</>
             ) : (
               <><BookmarkPlus className="w-4 h-4 mr-2" /> Save Standard</>
             )}
+          </Button>
+        </div>
+
+        {/* Action Bridge */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-6 border-t border-slate-100">
+          <Button 
+            variant="outline" 
+            className="flex flex-col items-center justify-center p-4 h-auto border-blue-200 hover:bg-blue-50 hover:border-blue-300"
+            onClick={() => navigate(`/certification?standardId=${standard.id}`)}
+          >
+            <ShieldCheck className="w-6 h-6 text-blue-600 mb-2" />
+            <span className="font-semibold text-slate-900">Certification Guidance</span>
+            <span className="text-xs text-slate-500 mt-1">Check schemes & requirements</span>
+          </Button>
+          
+          <Button 
+            variant="outline" 
+            className="flex flex-col items-center justify-center p-4 h-auto border-indigo-200 hover:bg-indigo-50 hover:border-indigo-300"
+            onClick={() => navigate(`/labs?standardId=${standard.id}`)}
+          >
+            <Microscope className="w-6 h-6 text-indigo-600 mb-2" />
+            <span className="font-semibold text-slate-900">Find Testing Labs</span>
+            <span className="text-xs text-slate-500 mt-1">Authorized testing facilities</span>
+          </Button>
+          
+          <Button 
+            variant="outline" 
+            className="flex flex-col items-center justify-center p-4 h-auto border-purple-200 hover:bg-purple-50 hover:border-purple-300"
+            onClick={() => navigate('/ask')}
+          >
+            <MessageSquare className="w-6 h-6 text-purple-600 mb-2" />
+            <span className="font-semibold text-slate-900">Ask SmartGuide</span>
+            <span className="text-xs text-slate-500 mt-1">Chat about this standard</span>
           </Button>
         </div>
       </div>
@@ -162,7 +216,8 @@ export default function StandardDetails() {
 
           <Card className="p-6">
             <h3 className="text-lg font-semibold text-slate-900 mb-4">Official Sources</h3>
-            <SourceList sources={mockSources} />
+            <p className="text-sm text-slate-600 mb-4">The information above is extracted from the following authoritative BIS documents:</p>
+            <SourceList sources={mockSources.slice(0, 2)} />
           </Card>
         </div>
 
@@ -183,13 +238,9 @@ export default function StandardDetails() {
                 <span className="text-slate-500">Category</span>
                 <span className="font-medium text-slate-900">{standard.category}</span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-slate-500">Status</span>
-                <span className="font-medium text-slate-900">{standard.status}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-500">Last Updated</span>
-                <span className="font-medium text-slate-900">{formatDate(new Date().toISOString())}</span>
+              <div className="flex justify-between border-t border-slate-200 pt-3">
+                <span className="text-slate-500 font-medium">Certification</span>
+                <span className="font-medium text-slate-900">{standard.certificationStatus === 'mandatory' ? 'Mandatory' : 'Voluntary'}</span>
               </div>
             </div>
             
@@ -208,10 +259,10 @@ export default function StandardDetails() {
                 {relatedStandards.map(rel => (
                   <div 
                     key={rel.id}
-                    className="p-3 border border-slate-100 rounded-lg bg-white hover:border-blue-300 cursor-pointer transition-colors"
+                    className="p-3 border border-slate-200 rounded-lg bg-white hover:border-blue-400 cursor-pointer transition-colors shadow-sm"
                     onClick={() => navigate(`/standards/${rel.id}`)}
                   >
-                    <p className="font-medium text-blue-600 text-sm">{rel.standardNumber}</p>
+                    <p className="font-semibold text-blue-700 text-sm">{rel.standardNumber}</p>
                     <p className="text-xs text-slate-600 line-clamp-2 mt-1">{rel.title}</p>
                   </div>
                 ))}

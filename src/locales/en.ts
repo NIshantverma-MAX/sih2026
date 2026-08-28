@@ -90,6 +90,23 @@ export const en = {
     bisCareApp: 'BIS Care App',
     exploreBtn: 'Explore'
   },
+  // Page chrome for the Certification Guide. The BIS regulatory content itself stays in
+  // the data layer in English, because it is quoted from official English sources.
+  certification: {
+    breadcrumbHome: 'Home',
+    breadcrumbCurrent: 'Certification',
+    title: 'Certification Guide',
+    subtitle: 'Get the right certification guidance for your product.',
+    journeyTitle: 'Your certification journey',
+    journeyHint:
+      'Seven stages from product to ongoing compliance. What each stage asks of you depends on your scheme and your standard — select a stage to see its detail.',
+    indicativeTimeline: 'Indicative timeline:',
+    indicativeCost: 'Indicative cost:',
+    estimateNote: 'Planning estimates held in SmartGuide — confirm current fees and timelines with BIS.',
+    errorTitle: 'We could not build your certification guidance',
+    errorDesc:
+      'Something went wrong while assembling the guidance for this product. Try again, or start from the applicable standard.'
+  },
   common: {
     general: 'General',
     explore: 'Explore'

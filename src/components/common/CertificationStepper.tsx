@@ -7,19 +7,25 @@ export interface CertificationStepperProps {
   steps: CertificationStep[];
   activeStep: number;
   onStepClick?: (stepIndex: number) => void;
+  /**
+   * Indexes the user has actually completed. When omitted, completion falls back to
+   * "everything before the active step", which is the original behaviour.
+   */
+  completedSteps?: number[];
 }
 
 export const CertificationStepper: React.FC<CertificationStepperProps> = ({
   steps,
   activeStep,
-  onStepClick
+  onStepClick,
+  completedSteps
 }) => {
   return (
     <div className="w-full py-4 overflow-x-auto">
       <div className="flex items-center min-w-max px-4">
         {steps.map((step, index) => {
           const isActive = index === activeStep;
-          const isCompleted = index < activeStep;
+          const isCompleted = completedSteps ? completedSteps.includes(index) : index < activeStep;
           
           return (
             <React.Fragment key={step.step}>
