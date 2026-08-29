@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { 
-  Shield, 
   Home, 
   FileText, 
   FlaskConical, 
@@ -13,6 +12,7 @@ import {
   Settings,
   Search,
   Menu,
+  ShieldCheck
 } from 'lucide-react';
 import { LanguageSelector } from '../components/common/LanguageSelector';
 import { UserMenu } from '../components/common/UserMenu';
@@ -38,7 +38,7 @@ const AppLayout = () => {
   const navLinks = [
     { to: '/', icon: Home, label: t('nav.home') || 'Home' },
     { to: '/standards', icon: FileText, label: t('nav.standards') || 'Standards' },
-    { to: '/certification', icon: Shield, label: t('nav.certificationGuide') || 'Certification Guide' },
+    { to: '/certification', icon: ShieldCheck, label: t('nav.certificationGuide') || 'Certification Guide' },
     { to: '/labs', icon: FlaskConical, label: t('nav.labs') || 'Testing Laboratories' },
     { to: '/hallmarking', icon: Diamond, label: t('nav.hallmarking') || 'Hallmarking' },
     { to: '/consumer-help', icon: HelpCircle, label: t('nav.consumerHelp') || 'Consumer Help' },
@@ -51,8 +51,8 @@ const AppLayout = () => {
   ];
 
   const Sidebar = () => (
-    <div className="flex flex-col h-full bg-[#0a1128] text-white">
-      <div className="flex-1 overflow-y-auto py-6 px-3 space-y-6">
+    <div className="flex flex-col h-full bg-[#0b132b] text-white">
+      <div className="flex-1 overflow-y-auto py-5 px-3 space-y-5">
         <nav className="space-y-1">
           {navLinks.map((link) => (
             <NavLink
@@ -60,22 +60,21 @@ const AppLayout = () => {
               to={link.to}
               onClick={() => setIsMobileMenuOpen(false)}
               className={({ isActive }) =>
-                `flex items-center gap-4 px-4 py-3 rounded-lg text-[14px] font-medium transition-colors relative ${isActive ? "bg-white/10 text-white" : "text-slate-300 hover:bg-white/5 hover:text-white"}`
+                `flex items-center gap-3.5 px-4 py-2.5 rounded-lg text-[14px] font-medium transition-colors ${isActive ? "bg-[#1f2937] text-white" : "text-slate-300 hover:bg-white/5 hover:text-white"}`
               }
             >
               {({ isActive }) => (
                 <>
-                  <link.icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+                  <link.icon className={`w-[18px] h-[18px] ${isActive ? 'text-white' : 'text-slate-400'}`} />
                   {link.label}
-                  {isActive && <div className="absolute left-0 w-1 h-8 bg-blue-500 rounded-r-full" />}
                 </>
               )}
             </NavLink>
           ))}
         </nav>
 
-        <div>
-          <div className="px-4 mb-3 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+        <div className="pt-2">
+          <div className="px-4 mb-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
             YOUR ACCOUNT
           </div>
           <nav className="space-y-1">
@@ -85,25 +84,23 @@ const AppLayout = () => {
                 to={link.to}
                 onClick={() => setIsMobileMenuOpen(false)}
                 className={({ isActive }) =>
-                  `flex items-center gap-4 px-4 py-3 rounded-lg text-[14px] font-medium transition-colors relative ${isActive ? "bg-white/10 text-white" : "text-slate-300 hover:bg-white/5 hover:text-white"}`
+                  `flex items-center gap-3.5 px-4 py-2.5 rounded-lg text-[14px] font-medium transition-colors ${isActive ? "bg-[#1f2937] text-white" : "text-slate-300 hover:bg-white/5 hover:text-white"}`
                 }
               >
                 {({ isActive }) => (
                   <>
-                    <link.icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+                    <link.icon className={`w-[18px] h-[18px] ${isActive ? 'text-white' : 'text-slate-400'}`} />
                     {link.label}
-                    {isActive && <div className="absolute left-0 w-1 h-8 bg-blue-500 rounded-r-full" />}
                   </>
                 )}
               </NavLink>
             ))}
             
-            {/* Ask SmartGuide specific button matching reference */}
             <button 
               onClick={() => { navigate('/ask'); setIsMobileMenuOpen(false); }}
-              className="w-full flex items-center gap-4 px-4 py-3 rounded-lg text-[14px] font-medium text-slate-300 hover:bg-white/5 hover:text-white transition-colors relative bg-[#1c263b] mt-4 shadow-sm"
+              className="w-full flex items-center gap-3.5 px-4 py-2.5 rounded-lg text-[14px] font-medium text-slate-300 hover:text-white transition-colors bg-[#1e293b] mt-3 border border-[#334155] hover:bg-[#334155]"
             >
-              <MessageSquare className="w-5 h-5 text-slate-400" />
+              <MessageSquare className="w-[18px] h-[18px] text-slate-400" />
               Ask SmartGuide
             </button>
           </nav>
@@ -111,15 +108,15 @@ const AppLayout = () => {
       </div>
 
       <div className="p-4">
-        <div className="bg-transparent border border-[#1c263b] rounded-xl p-4 relative overflow-hidden">
+        <div className="bg-transparent border border-[#1e293b] rounded-lg p-4">
           <div className="flex items-center gap-2 text-white font-medium mb-1">
             <HelpCircle className="w-4 h-4 text-slate-400" />
-            <span className="text-[14px]">Need Help?</span>
+            <span className="text-[13px] font-semibold">Need Help?</span>
           </div>
-          <p className="text-[12px] text-slate-400 mb-4 leading-relaxed">
+          <p className="text-[11.5px] text-slate-400 mb-3 leading-relaxed">
             Contact our support team for technical assistance.
           </p>
-          <button className="w-full bg-transparent text-white border border-[#2d3a54] py-2 rounded-lg text-[13px] font-medium hover:bg-[#1c263b] transition-colors">
+          <button className="w-full bg-transparent text-slate-300 border border-[#334155] py-1.5 rounded-md text-[12.5px] font-medium hover:bg-[#1e293b] transition-colors">
             Contact Support
           </button>
         </div>
@@ -129,7 +126,6 @@ const AppLayout = () => {
 
   return (
     <div className="min-h-screen bg-[#f8fafc] flex flex-col">
-      {/* Mobile Sidebar Overlay */}
       {isMobileMenuOpen && (
         <div 
           className="fixed inset-0 bg-gray-900/50 z-40 md:hidden"
@@ -137,8 +133,7 @@ const AppLayout = () => {
         />
       )}
 
-      {/* Top Header - Above everything */}
-      <header className="bg-white border-b border-gray-200 h-[68px] flex items-center justify-between px-4 md:px-8 z-30 shrink-0 shadow-sm">
+      <header className="bg-white border-b border-gray-200 h-[64px] flex items-center justify-between px-4 md:px-6 z-30 shrink-0 shadow-sm relative">
         <div className="flex items-center gap-3">
           <button 
             className="md:hidden p-2 text-gray-500 hover:bg-gray-100 rounded-lg mr-2"
@@ -148,12 +143,11 @@ const AppLayout = () => {
           </button>
           
           <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
-            <div className="flex items-center justify-center">
-              {/* Approximating BIS Logo with standard Shield + text */}
-              <Shield className="w-9 h-9 text-[#1d4ed8]" fill="currentColor" stroke="white" strokeWidth={1} />
+            <div className="flex items-center justify-center pt-0.5">
+              <img src="/bis-logo.png" alt="BIS Logo" className="h-10 w-auto object-contain" />
             </div>
             <div className="hidden sm:block">
-              <h1 className="text-[16px] font-extrabold text-slate-900 leading-tight tracking-tight">Bureau of Indian Standards</h1>
+              <h1 className="text-[17px] font-extrabold text-[#0c1a3b] leading-tight tracking-tight">Bureau of Indian Standards</h1>
               <p className="text-[11px] text-slate-500 font-medium">The National Standards Body of India</p>
             </div>
           </div>
@@ -176,26 +170,22 @@ const AppLayout = () => {
           )}
         </div>
 
-        <div className="flex items-center gap-3 sm:gap-6 shrink-0">
+        <div className="flex items-center gap-4 shrink-0">
           <UserMenu />
           <NotificationMenu />
           <LanguageSelector />
         </div>
       </header>
 
-      {/* Main Content Area */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Sidebar */}
         <aside className={`
-          absolute inset-y-0 left-0 z-20 w-[260px] transform transition-transform duration-300 ease-in-out md:relative md:translate-x-0
+          absolute inset-y-0 left-0 z-20 w-[240px] transform transition-transform duration-300 ease-in-out md:relative md:translate-x-0
           ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
         `}>
           <Sidebar />
         </aside>
 
-        {/* Main Area */}
         <main className="flex-1 overflow-y-auto">
-          {/* Mobile Search - Visible only on small screens */}
           {!isHome && (
             <div className="p-4 bg-white border-b border-gray-200 md:hidden shrink-0">
               <form onSubmit={handleSearch}>
