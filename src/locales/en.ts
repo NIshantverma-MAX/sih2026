@@ -13,12 +13,15 @@ export const en = {
     settings: 'Settings',
     needHelp: 'Need Help?',
     contactSupportDesc: 'Contact our support team for technical assistance.',
-    contactSupport: 'Contact Support'
+    contactSupport: 'Contact Support',
+    askSmartGuide: 'Ask SmartGuide'
   },
   header: {
     searchPlaceholder: 'Search standards, products, or ask a question...',
     searchButton: 'Search',
-    signIn: 'Sign In'
+    signIn: 'Sign In',
+    bis: 'Bureau of Indian Standards',
+    bisSub: 'The National Standards Body of India'
   },
   home: {
     welcome: 'Welcome to',
@@ -106,6 +109,42 @@ export const en = {
     errorTitle: 'We could not build your certification guidance',
     errorDesc:
       'Something went wrong while assembling the guidance for this product. Try again, or start from the applicable standard.'
+  },
+
+  settings: {
+    title: 'Settings',
+    subtitle: 'Manage your account preferences and app settings',
+    profile: {
+      title: 'Profile Information',
+      name: 'Name',
+      email: 'Email',
+      role: 'Role'
+    },
+    prefs: {
+      title: 'Preferences',
+      language: 'Language',
+      theme: 'Theme',
+      themeLight: 'Light',
+      themeDark: 'Dark',
+      themeSystem: 'System Default'
+    },
+    notifs: {
+      title: 'Notifications & Privacy',
+      email: 'Email Notifications',
+      emailDesc: 'Receive updates and newsletters via email.',
+      push: 'Push Notifications',
+      pushDesc: 'Receive real-time alerts in the browser.',
+      data: 'Data Sharing',
+      dataDesc: 'Share anonymous usage data to help us improve.'
+    },
+    actions: {
+      reset: 'Reset Defaults',
+      save: 'Save Settings'
+    },
+    toast: {
+      saved: 'Settings saved successfully.',
+      reset: 'Settings reset to defaults.'
+    }
   },
   common: {
     general: 'General',
