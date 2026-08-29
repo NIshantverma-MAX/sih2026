@@ -1,14 +1,11 @@
 import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
-// Using standard react state since we don't have react-hook-form properly installed in this mock
-// I will actually use react-hook-form as requested in the prompt, let's write it properly
 import { useForm as useRHForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useNavigate } from 'react-router-dom';
 import { ShieldCheck, Loader2 } from 'lucide-react';
 import { Input, Button, Card } from '../components/ui';
-import { login as authLogin } from '../services/authService';
+import { login as authLogin, loginWithGoogle } from '../services/authService';
 import { useStore } from '../lib/store';
 import toast from 'react-hot-toast';
 
@@ -23,6 +20,7 @@ export default function Login() {
   const navigate = useNavigate();
   const { login } = useStore();
   const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   const { register, handleSubmit, formState: { errors } } = useRHForm<LoginForm>({
     resolver: zodResolver(loginSchema)
@@ -36,9 +34,19 @@ export default function Login() {
       toast.success('Welcome back!');
       navigate('/');
     } catch (error) {
-      toast.error('Failed to login. Please check your credentials.');
+      toast.error(error instanceof Error ? error.message : 'Failed to login. Please check your credentials.');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setIsGoogleLoading(true);
+    try {
+      await loginWithGoogle();
+    } catch (error) {
+      setIsGoogleLoading(false);
+      toast.error(error instanceof Error ? error.message : 'Google sign-in failed.');
     }
   };
 
@@ -61,6 +69,31 @@ export default function Login() {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <Card className="py-8 px-4 shadow sm:rounded-lg sm:px-10">
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full justify-center gap-3 border-gray-300 bg-white text-gray-800 hover:bg-gray-50"
+            onClick={handleGoogleSignIn}
+            disabled={isGoogleLoading}
+          >
+            {isGoogleLoading ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              <span className="flex h-5 w-5 items-center justify-center rounded-full border border-gray-300 text-xs font-bold text-blue-600">
+                G
+              </span>
+            )}
+            Continue with Google
+          </Button>
+
+          <div className="my-6 flex items-center">
+            <div className="h-px flex-1 bg-gray-200" />
+            <span className="px-3 text-xs font-medium uppercase tracking-wide text-gray-500">
+              or
+            </span>
+            <div className="h-px flex-1 bg-gray-200" />
+          </div>
+
           <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
