@@ -1,6 +1,11 @@
-# BIS SmartGuide
+<h1 align="center">
+  <img src="public/bis-logo.png" alt="BIS logo" width="80" />
+  BIS SmartGuide
+</h1>
 
-AI-powered standards, certification, and BIS service guidance for Indian industries and consumers.
+<p align="center">
+  AI-powered standards, certification, and BIS service guidance for Indian industries and consumers.
+</p>
 
 This repository is being built for **Smart India Hackathon problem statement SIH26107: AI-powered Intelligent Assistant for Indian Standards and BIS Services for Industries and Consumers**.
 
