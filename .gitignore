@@ -28,6 +28,9 @@ dist-ssr
 .env.*
 !.env.example
 
+# InsForge local project config contains backend keys
+.insforge/
+
 # Temporary scripts
 *.cjs
 scratch/
