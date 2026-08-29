@@ -13,7 +13,6 @@ import {
   Settings,
   Search,
   Menu,
-  MessageCircle
 } from 'lucide-react';
 import { LanguageSelector } from '../components/common/LanguageSelector';
 import { UserMenu } from '../components/common/UserMenu';
@@ -37,23 +36,23 @@ const AppLayout = () => {
   };
 
   const navLinks = [
-    { to: '/', icon: Home, label: t('nav.home') },
-    { to: '/standards', icon: FileText, label: t('nav.standards') },
-    { to: '/certification', icon: Shield, label: t('nav.certificationGuide') },
-    { to: '/labs', icon: FlaskConical, label: t('nav.labs') },
-    { to: '/hallmarking', icon: Diamond, label: t('nav.hallmarking') },
-    { to: '/consumer-help', icon: HelpCircle, label: t('nav.consumerHelp') },
+    { to: '/', icon: Home, label: t('nav.home') || 'Home' },
+    { to: '/standards', icon: FileText, label: t('nav.standards') || 'Standards' },
+    { to: '/certification', icon: Shield, label: t('nav.certificationGuide') || 'Certification Guide' },
+    { to: '/labs', icon: FlaskConical, label: t('nav.labs') || 'Testing Laboratories' },
+    { to: '/hallmarking', icon: Diamond, label: t('nav.hallmarking') || 'Hallmarking' },
+    { to: '/consumer-help', icon: HelpCircle, label: t('nav.consumerHelp') || 'Consumer Help' },
   ];
 
   const userLinks = [
-    { to: '/upload-document', icon: Upload, label: t('nav.uploadDocument') },
-    { to: '/saved-items', icon: Bookmark, label: t('nav.savedItems') },
-    { to: '/settings', icon: Settings, label: t('nav.settings') },
+    { to: '/upload-document', icon: Upload, label: t('nav.uploadDocument') || 'Upload Document' },
+    { to: '/saved-items', icon: Bookmark, label: t('nav.savedItems') || 'Saved Items' },
+    { to: '/settings', icon: Settings, label: t('nav.settings') || 'Settings' },
   ];
 
   const Sidebar = () => (
-    <div className="flex flex-col h-full bg-[#0c1322] text-white border-r border-[#1a233a]">
-      <div className="flex-1 overflow-y-auto py-4 px-3 space-y-6">
+    <div className="flex flex-col h-full bg-[#0a1128] text-white">
+      <div className="flex-1 overflow-y-auto py-6 px-3 space-y-6">
         <nav className="space-y-1">
           {navLinks.map((link) => (
             <NavLink
@@ -61,7 +60,7 @@ const AppLayout = () => {
               to={link.to}
               onClick={() => setIsMobileMenuOpen(false)}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors relative ${isActive ? "bg-white/10 text-white" : "text-slate-400 hover:bg-white/5 hover:text-white"}`
+                `flex items-center gap-4 px-4 py-3 rounded-lg text-[14px] font-medium transition-colors relative ${isActive ? "bg-white/10 text-white" : "text-slate-300 hover:bg-white/5 hover:text-white"}`
               }
             >
               {({ isActive }) => (
@@ -76,7 +75,7 @@ const AppLayout = () => {
         </nav>
 
         <div>
-          <div className="px-4 mb-2 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+          <div className="px-4 mb-3 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
             YOUR ACCOUNT
           </div>
           <nav className="space-y-1">
@@ -86,7 +85,7 @@ const AppLayout = () => {
                 to={link.to}
                 onClick={() => setIsMobileMenuOpen(false)}
                 className={({ isActive }) =>
-                  `flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors relative ${isActive ? "bg-white/10 text-white" : "text-slate-400 hover:bg-white/5 hover:text-white"}`
+                  `flex items-center gap-4 px-4 py-3 rounded-lg text-[14px] font-medium transition-colors relative ${isActive ? "bg-white/10 text-white" : "text-slate-300 hover:bg-white/5 hover:text-white"}`
                 }
               >
                 {({ isActive }) => (
@@ -98,24 +97,38 @@ const AppLayout = () => {
                 )}
               </NavLink>
             ))}
+            
+            {/* Ask SmartGuide specific button matching reference */}
+            <button 
+              onClick={() => { navigate('/ask'); setIsMobileMenuOpen(false); }}
+              className="w-full flex items-center gap-4 px-4 py-3 rounded-lg text-[14px] font-medium text-slate-300 hover:bg-white/5 hover:text-white transition-colors relative bg-[#1c263b] mt-4 shadow-sm"
+            >
+              <MessageSquare className="w-5 h-5 text-slate-400" />
+              Ask SmartGuide
+            </button>
           </nav>
         </div>
       </div>
 
-      <div className="p-4 border-t border-[#1a233a]">
-        <button 
-          onClick={() => { navigate('/ask'); setIsMobileMenuOpen(false); }}
-          className="w-full bg-[#1e293b] text-white border border-[#334155] py-3 rounded-lg text-sm font-medium hover:bg-[#334155] transition-colors flex items-center justify-center gap-2"
-        >
-          <MessageCircle className="w-5 h-5 text-blue-400" />
-          Ask SmartGuide
-        </button>
+      <div className="p-4">
+        <div className="bg-transparent border border-[#1c263b] rounded-xl p-4 relative overflow-hidden">
+          <div className="flex items-center gap-2 text-white font-medium mb-1">
+            <HelpCircle className="w-4 h-4 text-slate-400" />
+            <span className="text-[14px]">Need Help?</span>
+          </div>
+          <p className="text-[12px] text-slate-400 mb-4 leading-relaxed">
+            Contact our support team for technical assistance.
+          </p>
+          <button className="w-full bg-transparent text-white border border-[#2d3a54] py-2 rounded-lg text-[13px] font-medium hover:bg-[#1c263b] transition-colors">
+            Contact Support
+          </button>
+        </div>
       </div>
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-[#f8fafc] flex flex-col">
       {/* Mobile Sidebar Overlay */}
       {isMobileMenuOpen && (
         <div 
@@ -124,8 +137,8 @@ const AppLayout = () => {
         />
       )}
 
-      {/* Top Header */}
-      <header className="bg-white border-b border-gray-200 h-16 flex items-center justify-between px-4 md:px-6 z-30 shrink-0">
+      {/* Top Header - Above everything */}
+      <header className="bg-white border-b border-gray-200 h-[68px] flex items-center justify-between px-4 md:px-8 z-30 shrink-0 shadow-sm">
         <div className="flex items-center gap-3">
           <button 
             className="md:hidden p-2 text-gray-500 hover:bg-gray-100 rounded-lg mr-2"
@@ -135,11 +148,12 @@ const AppLayout = () => {
           </button>
           
           <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
-            <div className="p-1.5 flex items-center justify-center">
-              <Shield className="w-8 h-8 text-blue-800" fill="currentColor" stroke="white" strokeWidth={1} />
+            <div className="flex items-center justify-center">
+              {/* Approximating BIS Logo with standard Shield + text */}
+              <Shield className="w-9 h-9 text-[#1d4ed8]" fill="currentColor" stroke="white" strokeWidth={1} />
             </div>
             <div className="hidden sm:block">
-              <h1 className="text-[17px] font-bold text-slate-900 leading-tight">Bureau of Indian Standards</h1>
+              <h1 className="text-[16px] font-extrabold text-slate-900 leading-tight tracking-tight">Bureau of Indian Standards</h1>
               <p className="text-[11px] text-slate-500 font-medium">The National Standards Body of India</p>
             </div>
           </div>
@@ -162,7 +176,7 @@ const AppLayout = () => {
           )}
         </div>
 
-        <div className="flex items-center gap-2 sm:gap-4 shrink-0">
+        <div className="flex items-center gap-3 sm:gap-6 shrink-0">
           <UserMenu />
           <NotificationMenu />
           <LanguageSelector />
@@ -198,7 +212,7 @@ const AppLayout = () => {
               </form>
             </div>
           )}
-          <div className="p-4 md:p-6 lg:p-8">
+          <div className="p-4 md:p-8 lg:p-10">
             <Outlet />
           </div>
         </main>
