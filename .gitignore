@@ -31,3 +31,6 @@ dist-ssr
 # Temporary scripts
 *.cjs
 scratch/
+
+# Local assistant/tooling settings
+.claude/*.local.json
