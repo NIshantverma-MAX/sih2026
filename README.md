@@ -22,23 +22,6 @@ Indian manufacturers, students, MSMEs, and consumers often struggle to answer ba
 
 BIS SmartGuide turns these workflows into one guided product experience with standards search, certification guidance, source-backed assistant responses, laboratory discovery, document upload analysis, and Hindi/English localization.
 
-## Current Status
-
-The current codebase is a **React + TypeScript frontend prototype** with mock services and structured data. Backend APIs, RAG ingestion, authentication persistence, and production database storage are designed through contracts under `docs/`, but are not yet deployed in this branch.
-
-| Area | Status |
-| --- | --- |
-| Frontend app shell and routing | Implemented |
-| Standards discovery UI | Implemented with mock data |
-| Certification guidance UI | Implemented with mock data |
-| Laboratory directory UI | Implemented with mock data |
-| Hallmarking verification UI | Implemented with mock data |
-| AI assistant UI | Implemented with mock response service |
-| English/Hindi localization | Implemented |
-| Backend API | Contract defined, implementation pending |
-| RAG pipeline | Contract defined, implementation pending |
-| Database schema | Draft schema defined |
-
 ## Core Features
 
 - **Standards search and recommendations**: Find relevant Indian Standards by product, category, sector, and certification status.
@@ -481,17 +464,6 @@ git status --short
 git diff --cached --name-only
 git ls-files | grep -E '(^\.env$|^\.env\.|secret|credential|private|\.pem$|\.key$)' || true
 ```
-
-## Roadmap
-
-1. Replace mock services with backend API integration.
-2. Implement authentication and role-aware dashboards.
-3. Build standards ingestion pipeline from verified BIS sources.
-4. Add vector search and RAG response validation.
-5. Implement document upload extraction and standards matching.
-6. Add admin workflows for knowledge base refresh and source verification.
-7. Harden production security, logging, rate limiting, and monitoring.
-8. Prepare SIH demo data, presentation script, and deployment environment.
 
 ## Documentation
 
