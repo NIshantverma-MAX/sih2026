@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, LogOut, Settings, MessageSquare, ChevronDown } from 'lucide-react';
+import { User, LogOut, LogIn, Settings, MessageSquare, ChevronDown } from 'lucide-react';
 import { useAppStore } from '../../lib/store';
 import { getInitials } from '../../utils/helpers';
 
@@ -26,7 +26,7 @@ export const UserMenu: React.FC = () => {
         onClick={() => navigate('/login')}
         className="text-sm font-medium text-blue-900 hover:text-blue-800"
       >
-        Sign In
+        <LogIn className="w-4 h-4 mr-1.5 inline-block" /> Sign In
       </button>
     );
   }
