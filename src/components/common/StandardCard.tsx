@@ -4,6 +4,7 @@ import { Card } from '../ui/Card';
 import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
 import { Standard } from '../../types';
+import { useTranslation } from '../../hooks/useTranslation';
 import { getRelevanceColor } from '../../utils/helpers';
 import { cn } from '../../utils/helpers';
 
@@ -24,6 +25,7 @@ export const StandardCard: React.FC<StandardCardProps> = ({
   onBookmark,
   isBookmarked = false
 }) => {
+  const { t } = useTranslation();
   const relevanceColors = {
     high: 'text-green-700 bg-green-50 border-green-200',
     medium: 'text-amber-700 bg-amber-50 border-amber-200',
@@ -66,7 +68,7 @@ export const StandardCard: React.FC<StandardCardProps> = ({
       {relevanceScore !== undefined && (
         <div className="mb-4">
           <div className="flex justify-between text-xs font-medium text-slate-500 mb-1.5">
-            <span>Relevance Score</span>
+            <span>{t("common.relevanceScore") || "Relevance Score"}</span>
             <span>{relevanceScore}%</span>
           </div>
           <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
@@ -81,7 +83,7 @@ export const StandardCard: React.FC<StandardCardProps> = ({
       {onViewDetails && (
         <div className="mt-4 pt-4 border-t border-slate-100 flex justify-between items-center">
           <span className="text-xs font-medium text-indigo-600 flex items-center">
-            <span className="mr-1">AI:</span> Highly relevant based on product
+            <span className="mr-1">{t("common.ai") || "AI:"}</span> {t("common.highlyRelevant") || "Highly relevant based on product"}
           </span>
           <div className="flex gap-2">
             <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); onViewDetails(); }} className="text-slate-700 hover:text-blue-700 hover:border-blue-300">

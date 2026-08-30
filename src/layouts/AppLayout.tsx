@@ -51,7 +51,7 @@ const AppLayout = () => {
   ];
 
   const Sidebar = () => (
-    <div className="flex flex-col h-full bg-[#0b132b] text-white">
+    <div className="flex flex-col h-full bg-slate-50 dark:bg-[#0b132b] text-slate-800 dark:text-white border-r border-slate-200 dark:border-transparent">
       <div className="flex-1 overflow-y-auto py-5 px-3 space-y-5">
         <nav className="space-y-1">
           {navLinks.map((link) => (
@@ -60,12 +60,12 @@ const AppLayout = () => {
               to={link.to}
               onClick={() => setIsMobileMenuOpen(false)}
               className={({ isActive }) =>
-                `flex items-center gap-3.5 px-4 py-2.5 rounded-lg text-[14px] font-medium transition-colors ${isActive ? "bg-[#1f2937] text-white" : "text-slate-300 hover:bg-white/5 hover:text-white"}`
+                `flex items-center gap-3.5 px-4 py-2.5 rounded-lg text-[14px] font-medium transition-colors ${isActive ? "bg-blue-100 text-blue-900 dark:bg-[#1f2937] dark:text-white" : "text-slate-600 hover:bg-slate-200/50 hover:text-blue-700 dark:text-slate-300 dark:hover:bg-white/5 dark:hover:text-white"}`
               }
             >
               {({ isActive }) => (
                 <>
-                  <link.icon className={`w-[18px] h-[18px] ${isActive ? 'text-white' : 'text-slate-400'}`} />
+                  <link.icon className={`w-[18px] h-[18px] ${isActive ? 'text-blue-700 dark:text-white' : 'text-slate-400 dark:text-slate-400'}`} />
                   {link.label}
                 </>
               )}
@@ -74,7 +74,7 @@ const AppLayout = () => {
         </nav>
 
         <div className="pt-2">
-          <div className="px-4 mb-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+          <div className="px-4 mb-3 text-[10px] font-bold text-slate-500 dark:text-slate-500 uppercase tracking-wider">
             {t('nav.yourAccount') || 'YOUR ACCOUNT'}
           </div>
           <nav className="space-y-1">
@@ -84,12 +84,12 @@ const AppLayout = () => {
                 to={link.to}
                 onClick={() => setIsMobileMenuOpen(false)}
                 className={({ isActive }) =>
-                  `flex items-center gap-3.5 px-4 py-2.5 rounded-lg text-[14px] font-medium transition-colors ${isActive ? "bg-[#1f2937] text-white" : "text-slate-300 hover:bg-white/5 hover:text-white"}`
+                  `flex items-center gap-3.5 px-4 py-2.5 rounded-lg text-[14px] font-medium transition-colors ${isActive ? "bg-blue-100 text-blue-900 dark:bg-[#1f2937] dark:text-white" : "text-slate-600 hover:bg-slate-200/50 hover:text-blue-700 dark:text-slate-300 dark:hover:bg-white/5 dark:hover:text-white"}`
                 }
               >
                 {({ isActive }) => (
                   <>
-                    <link.icon className={`w-[18px] h-[18px] ${isActive ? 'text-white' : 'text-slate-400'}`} />
+                    <link.icon className={`w-[18px] h-[18px] ${isActive ? 'text-blue-700 dark:text-white' : 'text-slate-400 dark:text-slate-400'}`} />
                     {link.label}
                   </>
                 )}
@@ -98,7 +98,7 @@ const AppLayout = () => {
             
             <button 
               onClick={() => { navigate('/ask'); setIsMobileMenuOpen(false); }}
-              className="w-full flex items-center gap-3.5 px-4 py-2.5 rounded-lg text-[14px] font-medium text-slate-300 hover:text-white transition-colors bg-[#1e293b] mt-3 border border-[#334155] hover:bg-[#334155]"
+              className="w-full flex items-center gap-3.5 px-4 py-2.5 rounded-lg text-[14px] font-medium text-blue-700 dark:text-slate-300 hover:text-blue-800 dark:hover:text-white transition-colors bg-blue-50 dark:bg-[#1e293b] mt-3 border border-blue-200 dark:border-[#334155] hover:bg-blue-100 dark:hover:bg-[#334155]"
             >
               <MessageSquare className="w-[18px] h-[18px] text-slate-400" />
               {t('nav.askSmartGuide') || 'Ask SmartGuide'}
@@ -108,15 +108,15 @@ const AppLayout = () => {
       </div>
 
       <div className="p-4">
-        <div className="bg-transparent border border-[#1e293b] rounded-lg p-4">
-          <div className="flex items-center gap-2 text-white font-medium mb-1">
+        <div className="bg-white dark:bg-transparent border border-slate-200 dark:border-[#1e293b] rounded-lg p-4">
+          <div className="flex items-center gap-2 text-slate-800 dark:text-white font-medium mb-1">
             <HelpCircle className="w-4 h-4 text-slate-400" />
             <span className="text-[13px] font-semibold">{t('nav.needHelp') || 'Need Help?'}</span>
           </div>
           <p className="text-[11.5px] text-slate-400 mb-3 leading-relaxed">
             {t('nav.contactSupportDesc') || 'Contact our support team for technical assistance.'}
           </p>
-          <button className="w-full bg-transparent text-slate-300 border border-[#334155] py-1.5 rounded-md text-[12.5px] font-medium hover:bg-[#1e293b] transition-colors">
+          <button className="w-full bg-transparent text-slate-600 dark:text-slate-300 border border-slate-300 dark:border-[#334155] py-1.5 rounded-md text-[12.5px] font-medium hover:bg-slate-50 dark:hover:bg-[#1e293b] transition-colors">
             {t('nav.contactSupport') || 'Contact Support'}
           </button>
         </div>

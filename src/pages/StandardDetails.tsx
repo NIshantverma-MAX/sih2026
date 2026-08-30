@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from '../hooks/useTranslation';
 import { ArrowLeft, CheckCircle, BookmarkPlus, BookmarkMinus, FileText, ExternalLink, ShieldCheck, Microscope, MessageSquare, AlertTriangle } from 'lucide-react';
 import { useAppStore } from '../lib/store';
 import { getStandard, getRelatedStandards, getLatestVersion } from '../services/standardsService';
@@ -15,6 +16,7 @@ import { sources as mockSources } from "../data/sources";
 import { formatDate } from '../utils/helpers';
 
 export default function StandardDetails() {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { isSaved, addSavedItem, removeSavedItem } = useAppStore();
@@ -89,10 +91,10 @@ export default function StandardDetails() {
       label: 'Scope & Overview',
       content: (
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-slate-900">Scope</h3>
+          <h3 className="text-lg font-semibold text-slate-900">{t("standardDetails.scope") || "Scope"}</h3>
           <p className="text-slate-700 leading-relaxed">{standard.description}</p>
           <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 mt-6">
-            <h4 className="font-medium text-slate-900 mb-2">Technical Scope:</h4>
+            <h4 className="font-medium text-slate-900 mb-2">{t("standardDetails.techScope") || "Technical Scope:"}</h4>
             <p className="text-slate-700">{standard.scope}</p>
           </div>
         </div>
@@ -103,7 +105,7 @@ export default function StandardDetails() {
       label: 'Key Requirements',
       content: (
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-slate-900">Extracted Requirements</h3>
+          <h3 className="text-lg font-semibold text-slate-900">{t("standardDetails.extractedRequirements") || "Extracted Requirements"}</h3>
           <ul className="space-y-3">
             {standard.keyRequirements?.length > 0 ? (
               standard.keyRequirements.map((req, i) => (
@@ -113,7 +115,7 @@ export default function StandardDetails() {
                 </li>
               ))
             ) : (
-              <li className="text-slate-500 italic">No specific requirements extracted for this prototype.</li>
+              <li className="text-slate-500 italic">{t("standardDetails.noRequirements") || "No specific requirements extracted for this prototype."}</li>
             )}
           </ul>
         </div>
@@ -135,8 +137,8 @@ export default function StandardDetails() {
           <div className="flex items-center gap-3">
             <AlertTriangle className="w-5 h-5 text-blue-600" />
             <div>
-              <p className="text-sm font-semibold text-blue-900">A newer version of this standard is available.</p>
-              <p className="text-xs text-blue-700">This standard is currently under revision.</p>
+              <p className="text-sm font-semibold text-blue-900">{t("standardDetails.newerVersion") || "A newer version of this standard is available."}</p>
+              <p className="text-xs text-blue-700">{t("standardDetails.underRevision") || "This standard is currently under revision."}</p>
             </div>
           </div>
           <Button variant="outline" size="sm" className="bg-white" onClick={() => navigate(`/standards/${latestVersion.id}`)}>
@@ -165,9 +167,9 @@ export default function StandardDetails() {
             onClick={toggleSave}
           >
             {saved ? (
-              <><BookmarkMinus className="w-4 h-4 mr-2 text-blue-600" /> Saved</>
+              <><BookmarkMinus className="w-4 h-4 mr-2 text-blue-600" /> {t("standardDetails.saved") || "Saved"}</>
             ) : (
-              <><BookmarkPlus className="w-4 h-4 mr-2" /> Save Standard</>
+              <><BookmarkPlus className="w-4 h-4 mr-2" /> {t("standardDetails.saveStandard") || "Save Standard"}</>
             )}
           </Button>
         </div>
@@ -180,7 +182,7 @@ export default function StandardDetails() {
             onClick={() => navigate(`/certification?standardId=${standard.id}`)}
           >
             <ShieldCheck className="w-6 h-6 text-blue-600 mb-2" />
-            <span className="font-semibold text-slate-900">Certification Guidance</span>
+            <span className="font-semibold text-slate-900">{t("standardDetails.certGuidance") || "Certification Guidance"}</span>
             <span className="text-xs text-slate-500 mt-1">Check schemes & requirements</span>
           </Button>
           
@@ -190,8 +192,8 @@ export default function StandardDetails() {
             onClick={() => navigate(`/labs?standardId=${standard.id}`)}
           >
             <Microscope className="w-6 h-6 text-indigo-600 mb-2" />
-            <span className="font-semibold text-slate-900">Find Testing Labs</span>
-            <span className="text-xs text-slate-500 mt-1">Authorized testing facilities</span>
+            <span className="font-semibold text-slate-900">{t("standardDetails.findLabs") || "Find Testing Labs"}</span>
+            <span className="text-xs text-slate-500 mt-1">{t("standardDetails.authFacilities") || "Authorized testing facilities"}</span>
           </Button>
           
           <Button 
@@ -200,8 +202,8 @@ export default function StandardDetails() {
             onClick={() => navigate('/ask')}
           >
             <MessageSquare className="w-6 h-6 text-purple-600 mb-2" />
-            <span className="font-semibold text-slate-900">Ask SmartGuide</span>
-            <span className="text-xs text-slate-500 mt-1">Chat about this standard</span>
+            <span className="font-semibold text-slate-900">{t("standardDetails.askSmartGuide") || "Ask SmartGuide"}</span>
+            <span className="text-xs text-slate-500 mt-1">{t("standardDetails.chatAbout") || "Chat about this standard"}</span>
           </Button>
         </div>
       </div>
@@ -215,7 +217,7 @@ export default function StandardDetails() {
           </Card>
 
           <Card className="p-6">
-            <h3 className="text-lg font-semibold text-slate-900 mb-4">Official Sources</h3>
+            <h3 className="text-lg font-semibold text-slate-900 mb-4">{t("standardDetails.officialSources") || "Official Sources"}</h3>
             <p className="text-sm text-slate-600 mb-4">The information above is extracted from the following authoritative BIS documents:</p>
             <SourceList sources={mockSources.slice(0, 2)} />
           </Card>

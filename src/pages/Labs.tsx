@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from "../hooks/useTranslation";
 import { useNavigate } from "react-router-dom";
 import { FlaskConical } from "lucide-react";
 import { PageHeader } from '../components/ui/PageHeader';
@@ -12,6 +13,7 @@ import { searchLaboratories } from '../services/laboratoryService';
 import { Laboratory } from '../types';
 
 export default function Labs() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [labs, setLabs] = useState<Laboratory[]>([]);
   const [loading, setLoading] = useState(true);
@@ -32,7 +34,7 @@ export default function Labs() {
       });
       setLabs(results);
     } catch (err) {
-      setError('Failed to load laboratories. Please try again later.');
+      setError(t('labs.errorDesc') || 'Failed to load laboratories. Please try again later.');
     } finally {
       setLoading(false);
     }
@@ -49,7 +51,7 @@ export default function Labs() {
   };
 
   const stateOptions = [
-    { value: 'all', label: 'All States' },
+    { value: 'all', label: t('labs.allStates') || 'All States' },
     { value: 'delhi', label: 'Delhi' },
     { value: 'maharashtra', label: 'Maharashtra' },
     { value: 'tamil nadu', label: 'Tamil Nadu' },
@@ -58,7 +60,7 @@ export default function Labs() {
   ];
 
   const standardOptions = [
-    { value: 'all', label: 'All Standards' },
+    { value: 'all', label: t('labs.allStandards') || 'All Standards' },
     { value: 'IS 17803:2022', label: 'IS 17803:2022' },
     { value: 'IS 9873', label: 'IS 9873 (Toys)' },
     { value: 'IS 14625', label: 'IS 14625 (Plastics)' },
@@ -68,11 +70,11 @@ export default function Labs() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="flex flex-col mb-8">
         <PageHeader 
-          title="BIS Recognized Testing Laboratories"
-          subtitle="For Standard: IS 17803:2022"
+          title={t("labs.title") || "BIS Recognized Testing Laboratories"}
+          subtitle={t("labs.subtitle") || "For Standard: IS 17803:2022"}
         />
         <p className="text-xs text-gray-400 mt-2 italic">
-          Prototype data — replace with official BIS laboratory data.
+          {t("labs.prototypeData") || "Prototype data — replace with official BIS laboratory data."}
         </p>
       </div>
 
@@ -82,7 +84,7 @@ export default function Labs() {
             value={searchQuery}
             onChange={setSearchQuery}
             onSearch={() => fetchLabs()} 
-            placeholder="Search by city or lab name..." 
+            placeholder={t("labs.searchPlaceholder") || "Search by city or lab name..."} 
           />
         </div>
         <div className="w-full sm:w-48">
@@ -113,7 +115,7 @@ export default function Labs() {
 
       {error && !loading && (
         <ErrorState 
-          title="Error Loading Laboratories" 
+          title={t("labs.errorTitle") || "Error Loading Laboratories"} 
           description={error} 
           onRetry={fetchLabs} 
         />
@@ -122,8 +124,8 @@ export default function Labs() {
       {!loading && !error && labs.length === 0 && (
         <EmptyState 
           icon={FlaskConical} 
-          title="No laboratories found" 
-          description="Try adjusting your filters or search query to find relevant testing laboratories." 
+          title={t("labs.emptyTitle") || "No laboratories found"} 
+          description={t("labs.emptyDesc") || "Try adjusting your filters or search query to find relevant testing laboratories."} 
         />
       )}
 

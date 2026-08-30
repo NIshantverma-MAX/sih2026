@@ -68,18 +68,18 @@ export default function Home() {
             <div className="relative z-30 mb-8 max-w-[600px]">
               <h1 className="text-[30px] lg:text-[34px] font-extrabold text-[#0c1a3b] dark:text-white leading-[1.15] mb-3 tracking-tight">
                 BUREAU OF INDIAN STANDARDS: <br/>
-                <span className="text-[#1e293b] dark:text-slate-300">National Standards &amp; Compliance Portal</span>
+                <span className="text-[#1e293b] dark:text-slate-300">{t("home.nationalPortal") || "National Standards & Compliance Portal"}</span>
               </h1>
               <p className="text-[14px] text-slate-600 dark:text-slate-300 font-medium mb-1">
                 Official Access to QCOs, Product Manuals, IS Codes, and Laboratory Recognition.
               </p>
               <p className="text-[12.5px] text-slate-400 dark:text-slate-500">
-                National Standards &amp; Compliance Portal | Powered by BIS SmartGuide AI.
+                {t("home.nationalPortal") || "National Standards & Compliance Portal"} | Powered by BIS SmartGuide AI.
               </p>
             </div>
             
             <div className="bg-white dark:bg-slate-800 px-7 py-6 rounded-2xl shadow-[0_4px_24px_rgb(0,0,0,0.06)] relative z-30 max-w-[680px]">
-              <h3 className="text-[14.5px] font-bold text-slate-900 dark:text-white mb-4">Search across 20,000+ Indian Standards &amp; Mandatory Procedures.</h3>
+              <h3 className="text-[14.5px] font-bold text-slate-900 dark:text-white mb-4">{t("home.searchAcross") || "Search across 20,000+ Indian Standards & Mandatory Procedures."}</h3>
               <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-3">
                 <div className="relative flex-1 flex items-center bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-indigo-500 overflow-hidden h-[50px]">
                   <div className="pl-4 pr-2 flex items-center justify-center text-slate-400 dark:text-slate-500">
@@ -98,7 +98,7 @@ export default function Home() {
               </form>
               
               <div className="mt-5">
-                <p className="text-[11.5px] font-bold text-slate-800 dark:text-slate-200 mb-2.5">Popular searches: Featured IS Codes &amp; Common Procedures</p>
+                <p className="text-[11.5px] font-bold text-slate-800 dark:text-slate-200 mb-2.5">{t("home.popularFeatured") || "Popular searches: Featured IS Codes & Common Procedures"}</p>
                 <div className="flex flex-wrap gap-2.5 items-center">
                   {popularSearches.map(item => (
                     <button
@@ -119,7 +119,7 @@ export default function Home() {
              <div className="absolute inset-0 bg-white" style={{ clipPath: 'polygon(0 0, 8% 0, 0 100%)', zIndex: 10 }}></div>
              <div className="absolute top-6 right-6 bg-white dark:bg-slate-900 px-3 py-1.5 rounded-lg shadow-sm border border-slate-100 z-20 flex flex-col items-center">
                <img src="/bis-logo.png" alt="Govt of India" className="h-4 w-auto mb-1 opacity-90" />
-               <span className="text-[9px] font-bold text-blue-900 tracking-tight">Govt of India (GOI)</span>
+               <span className="text-[9px] font-bold text-blue-900 tracking-tight">{t("home.goi") || "Govt of India (GOI)"}</span>
              </div>
             <img 
               src={bisBuildingImg} 
@@ -132,7 +132,7 @@ export default function Home() {
       </section>
 
       <div className="text-center mt-1 mb-8">
-        <p className="text-[11.5px] text-slate-400 dark:text-slate-500 font-semibold tracking-wide">A Service by the Bureau of Indian Standards, Govt of India.</p>
+        <p className="text-[11.5px] text-slate-400 dark:text-slate-500 font-semibold tracking-wide">{t("home.serviceBy") || "A Service by the Bureau of Indian Standards, Govt of India."}</p>
       </div>
 
       {/* Lower Area */}
@@ -140,7 +140,7 @@ export default function Home() {
         
         {/* Explore Services */}
         <section>
-          <h2 className="text-[20px] font-bold text-slate-900 dark:text-white mb-4">Explore Services</h2>
+          <h2 className="text-[20px] font-bold text-slate-900 dark:text-white mb-4">{t("home.exploreServices") || "Explore Services"}</h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 h-[calc(100%-48px)]">
             {services.map((service, idx) => (
               <Card 
@@ -167,8 +167,8 @@ export default function Home() {
         <section>
           <Card className="p-6 bg-white shadow-sm border border-slate-200 dark:border-slate-700 rounded-xl h-[calc(100%-12px)] mt-[44px]">
             <div className="flex items-center justify-between mb-5">
-              <h3 className="font-bold text-slate-900 dark:text-white text-[16px]">Recent Queries</h3>
-              <button onClick={() => navigate('/my-queries')} className="text-[13px] font-semibold text-indigo-600 hover:underline">View All</button>
+              <h3 className="font-bold text-slate-900 dark:text-white text-[16px]">{t("home.recentQueries") || "Recent Queries"}</h3>
+              <button onClick={() => navigate('/my-queries')} className="text-[13px] font-semibold text-indigo-600 hover:underline">{t("home.viewAll") || "View All"}</button>
             </div>
             <div className="space-y-4">
               {recentQueries.slice(0, 3).map((query, i) => (
@@ -176,7 +176,7 @@ export default function Home() {
                   <p className="text-[13.5px] font-medium text-slate-800 dark:text-slate-200 group-hover:text-indigo-600 transition-colors leading-snug mb-1 line-clamp-2">
                     {query.question}
                   </p>
-                  <p className="text-[11.5px] text-slate-400 dark:text-slate-500 font-medium">General • {query.date}</p>
+                  <p className="text-[11.5px] text-slate-400 dark:text-slate-500 font-medium">{t("common.general") || "General"} • {query.date}</p>
                   {i !== 2 && <div className="h-px w-full bg-slate-100 dark:bg-slate-800 mt-4"></div>}
                 </div>
               ))}

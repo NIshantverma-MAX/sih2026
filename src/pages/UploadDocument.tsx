@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from "../hooks/useTranslation";
 import { PageHeader, Button, Card, Badge } from '../components/ui';
 import { FileUploader } from '../components/common/FileUploader';
 import { uploadDocument, getDocumentResult } from '../services/documentService';
@@ -7,6 +8,7 @@ import toast from 'react-hot-toast';
 import { CheckCircle2, AlertTriangle, FileText, Loader2 } from 'lucide-react';
 
 export default function UploadDocument() {
+  const { t } = useTranslation();
   const [file, setFile] = useState<File | null>(null);
   const [stage, setStage] = useState<'idle' | 'uploading' | 'analyzing' | 'complete'>('idle');
   const [progressText, setProgressText] = useState('');

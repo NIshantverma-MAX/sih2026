@@ -140,12 +140,12 @@ export default function Standards() {
           <Card className="p-4 bg-white shadow-sm flex flex-col md:flex-row gap-4">
             <form onSubmit={handleSearch} className="flex-1 flex gap-2">
               <Input 
-                placeholder="Search by product, material, or IS number..." 
+                placeholder={t("standards.searchPlaceholder") || "Search by product, material, or IS number..."} 
                 value={localQuery}
                 onChange={e => setLocalQuery(e.target.value)}
                 className="w-full"
               />
-              <Button type="submit" variant="primary">Search</Button>
+              <Button type="submit" variant="primary">{t("common.search") || "Search"}</Button>
             </form>
             <div className="flex flex-wrap gap-2">
               <select 
@@ -153,7 +153,7 @@ export default function Standards() {
                 value={category}
                 onChange={e => setCategory(e.target.value)}
               >
-                <option value="">All Categories</option>
+                <option value="">{t("standards.allCategories") || "All Categories"}</option>
                 <option value="Electrical / Lighting">Electrical / Lighting</option>
                 <option value="Household / Food Contact Articles">Household / Food</option>
                 <option value="Construction / Building Materials">Construction</option>
@@ -163,10 +163,10 @@ export default function Standards() {
                 value={sortParam}
                 onChange={e => setSortParam(e.target.value)}
               >
-                <option value="relevance">Most Relevant</option>
-                <option value="recent">Recently Updated</option>
-                <option value="az">A-Z</option>
-                <option value="number">Standard Number</option>
+                <option value="relevance">{t("standards.mostRelevant") || "Most Relevant"}</option>
+                <option value="recent">{t("standards.recent") || "Recently Updated"}</option>
+                <option value="az">{t("standards.az") || "A-Z"}</option>
+                <option value="number">{t("standards.standardNumber") || "Standard Number"}</option>
               </select>
             </div>
           </Card>
@@ -179,14 +179,14 @@ export default function Standards() {
             </div>
           ) : error ? (
             <ErrorState 
-              title="Error fetching standards" 
+              title={t("standards.errorTitle") || "Error fetching standards"} 
               description={error.message} 
               onRetry={() => fetchResults(query)} 
             />
           ) : !query ? (
             <Card className="p-8 border-dashed border-2 border-slate-300 bg-slate-50 text-center">
               <Search className="w-12 h-12 text-slate-400 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-slate-900 mb-2">Find the right Indian Standard</h3>
+              <h3 className="text-lg font-semibold text-slate-900 mb-2">{t("standards.emptyTitle") || "Find the right Indian Standard"}</h3>
               <p className="text-slate-600 mb-6 max-w-md mx-auto">
                 Describe your product, its material, intended use, or search directly by an IS number.
               </p>
@@ -210,8 +210,8 @@ export default function Standards() {
               {filteredStandards.length === 0 && !productIdent?.isAmbiguous ? (
                 <EmptyState 
                   icon={Search} 
-                  title="No standards found" 
-                  description="We couldn't find any standards matching your query and filters. Try adjusting them." 
+                  title={t("standards.notFoundTitle") || "No standards found"} 
+                  description={t("standards.notFoundDesc") || "We couldn't find any standards matching your query and filters. Try adjusting them."} 
                 />
               ) : (
                 <>
@@ -273,8 +273,8 @@ export default function Standards() {
 
           <Card className="p-5 bg-indigo-50 border-indigo-100 shadow-sm text-center">
             <HelpCircle className="w-8 h-8 text-indigo-500 mx-auto mb-3" />
-            <h3 className="font-bold text-indigo-900 mb-2">Need Help?</h3>
-            <p className="text-sm text-indigo-700 mb-4">Unsure which standard applies? Ask our intelligent assistant.</p>
+            <h3 className="font-bold text-indigo-900 mb-2">{t("standards.needHelp") || "Need Help?"}</h3>
+            <p className="text-sm text-indigo-700 mb-4">{t("standards.needHelpDesc") || "Unsure which standard applies? Ask our intelligent assistant."}</p>
             <Button variant="primary" className="w-full bg-indigo-600 hover:bg-indigo-700" onClick={() => navigate('/ask')}>
               Ask SmartGuide
             </Button>
@@ -283,18 +283,18 @@ export default function Standards() {
 
       </div>
 
-      <Modal isOpen={showAnalysisModal} onClose={() => setShowAnalysisModal(false)} title="Detailed AI Analysis">
+      <Modal isOpen={showAnalysisModal} onClose={() => setShowAnalysisModal(false)} title={t("standards.aiAnalysis") || "Detailed AI Analysis"}>
         <div className="space-y-4">
-          <p className="text-sm text-slate-600">Based on your query <span className="font-medium text-slate-900">"{query}"</span>, our AI identified the following mapping:</p>
+          <p className="text-sm text-slate-600">Based on your query <span className="font-medium text-slate-900">"{query}"</span>{t("standards.aiIdentified") || ", our AI identified the following mapping:"}</p>
           <div className="bg-slate-50 p-4 rounded-md border border-slate-200">
-            <h4 className="font-semibold text-slate-800 mb-2">Extraction</h4>
+            <h4 className="font-semibold text-slate-800 mb-2">{t("standards.extraction") || "Extraction"}</h4>
             <ul className="list-disc pl-5 text-sm text-slate-700 space-y-1">
-              <li><strong>Product Match:</strong> {productIdent?.name}</li>
-              <li><strong>Category:</strong> {productIdent?.category}</li>
-              {productIdent?.intendedUse && <li><strong>Intended Use:</strong> {productIdent?.intendedUse}</li>}
+              <li><strong>{t("standards.productMatch") || "Product Match:"}</strong> {productIdent?.name}</li>
+              <li><strong>{t("standards.category") || "Category:"}</strong> {productIdent?.category}</li>
+              {productIdent?.intendedUse && <li><strong>{t("standards.intendedUse") || "Intended Use:"}</strong> {productIdent?.intendedUse}</li>}
             </ul>
           </div>
-          <p className="text-sm text-slate-600">The primary recommended standards were selected because their official BIS scope specifically covers these extracted properties. This recommendation is AI-assisted and should be verified against official BIS documentation.</p>
+          <p className="text-sm text-slate-600">{t("standards.aiDisclaimer") || "The primary recommended standards were selected because their official BIS scope specifically covers these extracted properties. This recommendation is AI-assisted and should be verified against official BIS documentation."}</p>
         </div>
       </Modal>
 
