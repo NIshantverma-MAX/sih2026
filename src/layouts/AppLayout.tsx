@@ -36,18 +36,18 @@ const AppLayout = () => {
   };
 
   const navLinks = [
-    { to: '/', icon: Home, label: t('nav.home') || 'Home' },
-    { to: '/standards', icon: FileText, label: t('nav.standards') || 'Standards' },
-    { to: '/certification', icon: ShieldCheck, label: t('nav.certificationGuide') || 'Certification Guide' },
-    { to: '/labs', icon: FlaskConical, label: t('nav.labs') || 'Testing Laboratories' },
-    { to: '/hallmarking', icon: Diamond, label: t('nav.hallmarking') || 'Hallmarking' },
-    { to: '/consumer-help', icon: HelpCircle, label: t('nav.consumerHelp') || 'Consumer Help' },
+    { to: '/', icon: Home, label: t('nav.home') },
+    { to: '/standards', icon: FileText, label: t('nav.standards') },
+    { to: '/certification', icon: ShieldCheck, label: t('nav.certificationGuide') },
+    { to: '/labs', icon: FlaskConical, label: t('nav.labs') },
+    { to: '/hallmarking', icon: Diamond, label: t('nav.hallmarking') },
+    { to: '/consumer-help', icon: HelpCircle, label: t('nav.consumerHelp') },
   ];
 
   const userLinks = [
-    { to: '/upload-document', icon: Upload, label: t('nav.uploadDocument') || 'Upload Document' },
-    { to: '/saved-items', icon: Bookmark, label: t('nav.savedItems') || 'Saved Items' },
-    { to: '/settings', icon: Settings, label: t('nav.settings') || 'Settings' },
+    { to: '/upload-document', icon: Upload, label: t('nav.uploadDocument') },
+    { to: '/saved-items', icon: Bookmark, label: t('nav.savedItems') },
+    { to: '/settings', icon: Settings, label: t('nav.settings') },
   ];
 
   const Sidebar = () => (
@@ -75,7 +75,7 @@ const AppLayout = () => {
 
         <div className="pt-2">
           <div className="px-4 mb-3 text-[10px] font-bold text-slate-500 dark:text-slate-500 uppercase tracking-wider">
-            {t('nav.yourAccount') || 'YOUR ACCOUNT'}
+            {t('nav.yourAccount')}
           </div>
           <nav className="space-y-1">
             {userLinks.map((link) => (
@@ -101,7 +101,7 @@ const AppLayout = () => {
               className="w-full flex items-center gap-3.5 px-4 py-2.5 rounded-lg text-[14px] font-medium text-blue-700 dark:text-slate-300 hover:text-blue-800 dark:hover:text-white transition-colors bg-blue-50 dark:bg-[#1e293b] mt-3 border border-blue-200 dark:border-[#334155] hover:bg-blue-100 dark:hover:bg-[#334155]"
             >
               <MessageSquare className="w-[18px] h-[18px] text-slate-400" />
-              {t('nav.askSmartGuide') || 'Ask SmartGuide'}
+              {t('nav.askSmartGuide')}
             </button>
           </nav>
         </div>
@@ -111,13 +111,13 @@ const AppLayout = () => {
         <div className="bg-white dark:bg-transparent border border-slate-200 dark:border-[#1e293b] rounded-lg p-4">
           <div className="flex items-center gap-2 text-slate-800 dark:text-white font-medium mb-1">
             <HelpCircle className="w-4 h-4 text-slate-400" />
-            <span className="text-[13px] font-semibold">{t('nav.needHelp') || 'Need Help?'}</span>
+            <span className="text-[13px] font-semibold">{t('nav.needHelp')}</span>
           </div>
           <p className="text-[11.5px] text-slate-400 mb-3 leading-relaxed">
-            {t('nav.contactSupportDesc') || 'Contact our support team for technical assistance.'}
+            {t('nav.contactSupportDesc')}
           </p>
           <button className="w-full bg-transparent text-slate-600 dark:text-slate-300 border border-slate-300 dark:border-[#334155] py-1.5 rounded-md text-[12.5px] font-medium hover:bg-slate-50 dark:hover:bg-[#1e293b] transition-colors">
-            {t('nav.contactSupport') || 'Contact Support'}
+            {t('nav.contactSupport')}
           </button>
         </div>
       </div>
@@ -144,11 +144,11 @@ const AppLayout = () => {
           
           <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
             <div className="flex items-center justify-center pt-0.5">
-              <img src="/bis-logo.png" alt="BIS Logo" className="h-10 w-auto object-contain" />
+              <img src="/bis-logo.png" alt={t('a11y.bisLogo')} className="h-10 w-auto object-contain" />
             </div>
             <div className="hidden sm:block">
-              <h1 className="text-[17px] font-extrabold text-[#0c1a3b] dark:text-white leading-tight tracking-tight">{t('header.bis') || 'Bureau of Indian Standards'}</h1>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">{t('header.bisSub') || 'The National Standards Body of India'}</p>
+              <h1 className="text-[17px] font-extrabold text-[#0c1a3b] dark:text-white leading-tight tracking-tight">{t('header.bis')}</h1>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">{t('header.bisSub')}</p>
             </div>
           </div>
         </div>

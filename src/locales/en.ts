@@ -107,8 +107,9 @@ export const en = {
     bisCareApp: 'BIS Care App',
     exploreBtn: 'Explore'
   },
-  // Page chrome for the Certification Guide. The BIS regulatory content itself stays in
-  // the data layer in English, because it is quoted from official English sources.
+  // UI chrome for the Certification Guide (page + all child components). Official regulatory
+  // *content* — quoted BIS snippets, IS numbers, scheme names, QCO codes, URLs — stays in the
+  // data layer and is localized there via a Hindi overlay, not here.
   certification: {
     breadcrumbHome: 'Home',
     breadcrumbCurrent: 'Certification',
@@ -122,7 +123,147 @@ export const en = {
     estimateNote: 'Planning estimates held in SmartGuide — confirm current fees and timelines with BIS.',
     errorTitle: 'We could not build your certification guidance',
     errorDesc:
-      'Something went wrong while assembling the guidance for this product. Try again, or start from the applicable standard.'
+      'Something went wrong while assembling the guidance for this product. Try again, or start from the applicable standard.',
+
+    // Shared labels used by more than one child component.
+    findApplicableStandard: 'Find applicable standard',
+    whatBisStates: 'What BIS states',
+    sourcePrefix: 'Source:',
+
+    start: {
+      heading: 'Select or describe your product to begin.',
+      introBeforeQco:
+        'Certification requirements are decided by the Indian Standard that covers your product — which tests you need, whether a ',
+      introAfterQco:
+        ' makes it compulsory, which scheme applies, and what BIS will check. Until we know your standard we can only show generic information, so tell us what you make.',
+      productPlaceholder: 'e.g. stainless steel water bottle, LED bulb, pressure cooker',
+      describeAria: 'Describe your product',
+      knowBeforeLink: 'Already know your standard? Browse ',
+      knowLink: 'Standards',
+      knowBetween: ' and open ',
+      knowCta: 'Get certification guidance',
+      knowAfter: ' from the standard’s page.',
+      suggestBefore: 'Standards that may cover ',
+      yourProduct: 'your product',
+      suggestSubtitle:
+        'Pick the one whose scope matches your product. The certification guidance below will then be built for it.',
+      seeAll: 'See all matching standards',
+      match: {
+        high: 'High match',
+        medium: 'Medium match',
+        low: 'Low match'
+      }
+    },
+
+    help: {
+      title: 'Need help?',
+      desc: 'Ask a follow-up question about your product, or find a laboratory that can run the tests your standard requires.',
+      askAssistant: 'Ask the assistant',
+      findLabs: 'Find testing labs',
+      contactBis: 'Contact BIS'
+    },
+
+    sources: {
+      title: 'Official sources',
+      desc: 'Only bis.gov.in, crsbis.in and the BIS portals — nothing on this page comes from a blog.',
+      page: 'page',
+      moreOne: 'more source is cited inside the individual steps above.',
+      moreMany: 'more sources are cited inside the individual steps above.',
+      typeLabel: {
+        regulation: 'Regulation',
+        guideline: 'Guideline',
+        notification: 'Notification',
+        website: 'BIS page',
+        standard: 'Standard'
+      }
+    },
+
+    scheme: {
+      confConfirmed: 'Confirmed against BIS',
+      confInferred: 'Best match — verify',
+      confUnknown: 'Not determined yet',
+      notDetermined: 'Certification scheme not determined',
+      why: 'Why this scheme',
+      inPlainWords: 'In plain words: ',
+      whatYouGet: 'What you end up with',
+      legalBasis: 'Legal basis',
+      hideDetails: 'Hide scheme details',
+      viewDetails: 'View scheme details',
+      whoApplies: 'Who it applies to',
+      howItWorks: 'How the scheme works',
+      officialPages: 'Official pages for this scheme',
+      goToPrefix: 'Go to ',
+      checkListed: 'Check if your product is listed'
+    },
+
+    context: {
+      originStandard: 'Carried over from the standard you were viewing',
+      originProduct: 'Matched from the product you described',
+      originNone: 'No product context yet',
+      title: 'Your product context',
+      product: 'Product',
+      notSpecified: 'Not specified',
+      applicableStandard: 'Applicable standard',
+      notIdentifiedYet: 'Not identified yet',
+      whereMfg: 'Where is your manufacturing unit?',
+      mfgHint:
+        'A factory outside India applies through a different BIS scheme, so this changes the guidance below.',
+      inIndia: 'In India',
+      outsideIndia: 'Outside India',
+      changeProduct: 'Change product',
+      changeStandard: 'Change standard'
+    },
+
+    stage: {
+      confirmedLabel: 'From official BIS sources',
+      confirmedNote: 'The statements in this step come from the BIS pages cited below.',
+      inferredLabel: 'Assembled from BIS sources',
+      inferredNote:
+        'This step is put together from the BIS sources cited below rather than quoted from one instruction. Check the sources before you commit money or time.',
+      unknownLabel: 'Read the official source',
+      unknownNote:
+        'BIS publishes this step inside a document we cannot quote here. We would rather point you at it than fill in a plausible answer.',
+      step: 'Step',
+      markedDone: 'Marked done',
+      question: 'The question at this step',
+      whyMatters: 'Why this matters',
+      termsHere: 'Terms here',
+      docsNeeded: 'Documents you will need at this step',
+      doNext: 'Do this next',
+      sourcesForStep: 'Sources for this step',
+      prevStep: 'Previous step',
+      markedAsDone: 'Marked as done',
+      markStepDone: 'Mark this step done',
+      nextStep: 'Next step'
+    },
+
+    verdict: {
+      mandatory: 'Mandatory',
+      voluntary: 'Voluntary',
+      needsVerification: 'Check required',
+      voluntaryUnlessBefore: 'BIS certification is voluntary unless a ',
+      voluntaryUnlessAfter: ' makes it compulsory for your product.'
+    },
+
+    progress: {
+      title: 'Your progress',
+      youAreHere: 'You are here',
+      upNext: 'Up next: '
+    },
+
+    checklist: {
+      title: 'Checklist for this step',
+      done: 'done'
+    },
+
+    glossary: {
+      close: 'Close explanation',
+      source: 'Source: '
+    },
+
+    warnings: {
+      title: 'Watch out for'
+    }
   },
 
   settings: {
@@ -177,7 +318,20 @@ export const en = {
     viewDetails: 'View Details',
     relevanceScore: 'Relevance score',
     ai: 'AI:',
-    highlyRelevant: 'Highly relevant based on product'
+    highlyRelevant: 'Highly relevant based on product',
+    errorTitle: 'Something went wrong',
+    errorDesc: 'An error occurred while loading the data. Please try again.',
+    noData: 'No data available',
+    searchPlaceholder: 'Search...'
+  },
+  // Accessibility strings (aria-labels, alt text). User-facing to screen readers, so localized.
+  a11y: {
+    breadcrumb: 'Breadcrumb',
+    tabs: 'Tabs',
+    bisLogo: 'BIS Logo'
+  },
+  auth: {
+    brandTagline: 'AI Standards & Certification Assistant'
   },
   labs: {
     title: 'BIS Recognized Testing Laboratories',

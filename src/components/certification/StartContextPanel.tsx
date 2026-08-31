@@ -7,6 +7,7 @@ import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { StandardRecommendation } from '../../types';
 import { GlossaryChip } from './GlossaryChip';
+import { useTranslation } from '../../hooks/useTranslation';
 
 export interface StartContextPanelProps {
   /** Product the user described, when we have one but still no standard. */

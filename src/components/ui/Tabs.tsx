@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { cn } from '../../utils/helpers';
+import { useTranslation } from '../../hooks/useTranslation';
 
 export interface Tab {
   id: string;
@@ -16,6 +17,7 @@ export interface TabsProps {
 }
 
 export const Tabs: React.FC<TabsProps> = ({ tabs, defaultTab, activeTab: controlledTab, onChange, className }) => {
+  const { t } = useTranslation();
   const [internalTab, setInternalTab] = useState(defaultTab || tabs[0]?.id);
   const activeTab = controlledTab !== undefined ? controlledTab : internalTab;
 
@@ -31,7 +33,7 @@ export const Tabs: React.FC<TabsProps> = ({ tabs, defaultTab, activeTab: control
   return (
     <div className={className}>
       <div className="border-b border-gray-200">
-        <nav className="-mb-px flex space-x-8" aria-label="Tabs">
+        <nav className="-mb-px flex space-x-8" aria-label={t('a11y.tabs')}>
           {tabs.map((tab) => (
             <button
               key={tab.id}
