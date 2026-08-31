@@ -2,7 +2,7 @@ import React from 'react';
 import { Bot, User } from 'lucide-react';
 import { AssistantMessage as AssistantMessageType } from '../../types';
 import { StandardCard } from './StandardCard';
-import { Badge } from '../ui/Badge';
+import { SourceCitation } from './SourceCitation';
 import { cn } from '../../utils/helpers';
 
 export interface AssistantMessageProps {
@@ -29,7 +29,7 @@ export const AssistantMessage: React.FC<AssistantMessageProps> = ({ message }) =
           "rounded-2xl px-5 py-4 shadow-sm",
           isUser ? "bg-blue-900 text-white rounded-tr-none" : "bg-white border border-gray-200 text-gray-800 rounded-tl-none"
         )}>
-          <div className="prose prose-sm max-w-none dark:prose-invert">
+          <div className="prose prose-sm max-w-none whitespace-pre-wrap dark:prose-invert">
             {message.content}
           </div>
           
@@ -58,13 +58,17 @@ export const AssistantMessage: React.FC<AssistantMessageProps> = ({ message }) =
               {message.response.sources && message.response.sources.length > 0 && (
                 <div className="mt-3">
                   <p className="text-sm font-semibold text-gray-900 mb-2">Sources:</p>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="space-y-2">
                     {message.response.sources.map((source, idx) => (
-                      <Badge key={source.id || idx} variant="info" className="text-xs">
-                        {source.documentName}
-                      </Badge>
+                      <SourceCitation key={source.id || idx} source={source} />
                     ))}
                   </div>
+                </div>
+              )}
+
+              {message.response.warnings && message.response.warnings.length > 0 && (
+                <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+                  {message.response.warnings[0]}
                 </div>
               )}
               

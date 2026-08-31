@@ -291,6 +291,7 @@ export interface TestingRequirement {
 // Source/Citation types
 export interface SourceCitation {
   id: string;
+  citationLabel?: string;
   title: string;
   url: string;
   documentName: string;

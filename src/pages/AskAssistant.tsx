@@ -57,6 +57,22 @@ export default function AskAssistant() {
       setMessages(prev => [...prev, assistantMsg]);
     } catch (error) {
       console.error(error);
+      const assistantMsg: AssistantMessageType = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: language === 'hi'
+          ? 'BIS SmartGuide अभी आधिकारिक BIS स्रोतों से उत्तर नहीं ला पा रहा है। कृपया कुछ देर बाद फिर कोशिश करें।'
+          : 'BIS SmartGuide could not retrieve an official-source answer right now. Please try again in a moment.',
+        timestamp: new Date().toISOString(),
+        language,
+        response: {
+          answer: '',
+          warnings: [
+            'The assistant failed closed instead of returning an unsourced answer.',
+          ],
+        },
+      };
+      setMessages(prev => [...prev, assistantMsg]);
     } finally {
       setIsLoading(false);
     }
