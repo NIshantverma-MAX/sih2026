@@ -26,7 +26,7 @@ BIS SmartGuide turns these workflows into one guided product experience with sta
 
 - **Standards search and recommendations**: Find relevant Indian Standards by product, category, sector, and certification status.
 - **Certification journey guidance**: Show mandatory/voluntary verdicts, scheme explanation, documents, checklist, official sources, and next actions.
-- **AI assistant**: Planned source-backed RAG assistant for BIS standards, certification, QCOs, testing, and hallmarking questions.
+- **AI assistant**: Official-source BIS guidance with linked citations, signed-in chat history, and new conversation support.
 - **Laboratory discovery**: Search BIS-recognized laboratories by city, state, category, and supported standards.
 - **Hallmarking support**: HUID verification flow for consumers and jewellers.
 - **Document upload workflow**: Planned document extraction and analysis for product identification and standards mapping.
@@ -152,9 +152,10 @@ The database design separates user data, standards knowledge, official source pr
 ```mermaid
 erDiagram
   USERS ||--o{ QUERIES : asks
+  USERS ||--o{ ASSISTANT_CONVERSATIONS : owns
   USERS ||--o{ DOCUMENTS : uploads
   USERS ||--o{ SAVED_ITEMS : saves
-  QUERIES ||--o{ ASSISTANT_MESSAGES : contains
+  ASSISTANT_CONVERSATIONS ||--o{ ASSISTANT_MESSAGES : contains
   STANDARDS ||--o{ STANDARD_CHUNKS : indexed_as
   STANDARDS ||--o{ CERTIFICATION_RULES : governed_by
   STANDARDS ||--o{ QCOS : mandated_by
@@ -236,12 +237,23 @@ erDiagram
     timestamp created_at
   }
 
+  ASSISTANT_CONVERSATIONS {
+    uuid id PK
+    uuid user_id FK
+    text title
+    enum language
+    timestamp created_at
+    timestamp updated_at
+  }
+
   ASSISTANT_MESSAGES {
     uuid id PK
-    uuid query_id FK
+    uuid conversation_id FK
+    uuid user_id FK
     enum role
     text content
-    jsonb response_json
+    enum language
+    jsonb response
     timestamp created_at
   }
 
@@ -301,7 +313,7 @@ erDiagram
 | Standards knowledge | `standards`, `standard_chunks`, `sources` | Searchable standard metadata, source provenance, and RAG-ready chunks. |
 | Certification | `qcos`, `certification_rules` | Mandatory/voluntary decisions, QCO evidence, and scheme checklists. |
 | Laboratories | `laboratories`, `lab_standards` | BIS-recognized lab directory and supported testing standards. |
-| Assistant | `queries`, `assistant_messages` | Conversation history, structured assistant outputs, warnings, and citations. |
+| Assistant | `assistant_conversations`, `assistant_messages` | Owner-isolated conversation history, structured assistant outputs, warnings, and citations. |
 | Documents | `documents`, `document_chunks` | Upload processing, extracted text, analysis results, and embeddings. |
 | User workspace | `saved_items` | Saved standards, labs, guides, and queries. |
 

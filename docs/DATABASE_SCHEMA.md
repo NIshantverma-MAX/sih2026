@@ -90,15 +90,31 @@ Future database architecture for the BIS SmartGuide platform.
 | status | ENUM | answered, pending, error |
 | created_at | TIMESTAMP | |
 
+### assistant_conversations
+| Column | Type | Description |
+|--------|------|-------------|
+| id | UUID | Primary key |
+| user_id | UUID | FK -> `auth.users`; defaults to the signed-in user |
+| title | TEXT | First-question summary, 1-120 characters |
+| language | ENUM | en, hi |
+| created_at | TIMESTAMPTZ | Creation time |
+| updated_at | TIMESTAMPTZ | Advanced whenever a message is appended |
+
+RLS permits only the owning authenticated user to insert or read a conversation. Anonymous users have no table privileges.
+
 ### assistant_messages
 | Column | Type | Description |
 |--------|------|-------------|
 | id | UUID | Primary key |
-| query_id | UUID | FK -> queries |
+| conversation_id | UUID | Composite FK with `user_id` -> assistant_conversations |
+| user_id | UUID | FK -> `auth.users`; defaults to the signed-in user |
 | role | ENUM | user, assistant |
 | content | TEXT | Message content |
-| response_json | JSONB | Structured response |
-| created_at | TIMESTAMP | |
+| language | ENUM | en, hi |
+| response | JSONB | Structured answer, warnings, and official-source citations |
+| created_at | TIMESTAMPTZ | Creation time |
+
+RLS permits only the owning authenticated user to insert or read messages. The composite `(conversation_id, user_id)` foreign key prevents a user from attaching a message to another user's conversation even if its UUID is known.
 
 ### documents
 | Column | Type | Description |

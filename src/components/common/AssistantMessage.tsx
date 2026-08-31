@@ -13,8 +13,8 @@ export const AssistantMessage: React.FC<AssistantMessageProps> = ({ message }) =
   const isUser = message.role === 'user';
   
   return (
-    <div className={cn("flex w-full mb-6", isUser ? "justify-end" : "justify-start")}>
-      <div className={cn("flex max-w-3xl", isUser ? "flex-row-reverse" : "flex-row")}>
+    <div className={cn("flex w-full min-w-0 mb-6", isUser ? "justify-end" : "justify-start")}>
+      <div className={cn("flex w-full min-w-0 max-w-3xl", isUser ? "flex-row-reverse" : "flex-row")}>
         
         {/* Avatar */}
         <div className={cn(
@@ -26,7 +26,7 @@ export const AssistantMessage: React.FC<AssistantMessageProps> = ({ message }) =
         
         {/* Message Content */}
         <div className={cn(
-          "rounded-2xl px-5 py-4 shadow-sm",
+          "min-w-0 max-w-[calc(100%-2.75rem)] break-words rounded-2xl px-5 py-4 shadow-sm",
           isUser ? "bg-blue-900 text-white rounded-tr-none" : "bg-white border border-gray-200 text-gray-800 rounded-tl-none"
         )}>
           <div className="prose prose-sm max-w-none whitespace-pre-wrap dark:prose-invert">

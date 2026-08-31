@@ -8,21 +8,33 @@ import { hydrateCurrentUser } from './services/authService';
 function App() {
   const login = useStore((state) => state.login);
   const logout = useStore((state) => state.logout);
+  const setAuthHydrated = useStore((state) => state.setAuthHydrated);
 
   useEffect(() => {
     let cancelled = false;
 
     async function hydrateAuth() {
-      const user = await hydrateCurrentUser();
+      try {
+        const user = await hydrateCurrentUser();
 
-      if (cancelled) {
-        return;
-      }
+        if (cancelled) {
+          return;
+        }
 
-      if (user) {
-        login(user);
-      } else {
-        logout();
+        if (user) {
+          login(user);
+        } else {
+          logout();
+        }
+      } catch (error) {
+        console.error('Failed to restore the InsForge session.', error);
+        if (!cancelled) {
+          logout();
+        }
+      } finally {
+        if (!cancelled) {
+          setAuthHydrated(true);
+        }
       }
     }
 
@@ -31,7 +43,7 @@ function App() {
     return () => {
       cancelled = true;
     };
-  }, [login, logout]);
+  }, [login, logout, setAuthHydrated]);
 
   return (
     <>

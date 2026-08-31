@@ -263,6 +263,14 @@ export interface AssistantMessage {
   response?: AssistantResponse;
 }
 
+export interface AssistantConversation {
+  id: string;
+  title: string;
+  language: Language;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface AssistantResponse {
   answer: string;
   product?: ProductIdentification;

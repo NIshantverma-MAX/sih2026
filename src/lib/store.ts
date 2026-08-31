@@ -6,8 +6,10 @@ import { notifications as mockNotifications } from '../data/notifications';
 interface AppState {
   user: User | null;
   isAuthenticated: boolean;
+  authHydrated: boolean;
   login: (user: User) => void;
   logout: () => void;
+  setAuthHydrated: (hydrated: boolean) => void;
   
   language: Language;
   setLanguage: (lang: Language) => void;
@@ -41,11 +43,13 @@ export const useStore = create<AppState>()(
     (set, get) => ({
       user: null,
       isAuthenticated: false,
+      authHydrated: false,
       login: (user) => set({ user, isAuthenticated: true }),
       logout: () => {
         localStorage.removeItem('bis_user');
         set({ user: null, isAuthenticated: false });
       },
+      setAuthHydrated: (authHydrated) => set({ authHydrated }),
       
       language: 'en',
       setLanguage: (language) => set({ language }),
