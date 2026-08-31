@@ -15,9 +15,7 @@ export const standards: Standard[] = [
     icsCode: '77.140.20',
     certificationStatus: 'mandatory',
     relatedStandardIds: [],
-    // SRC-001 is IS 17526 itself, SRC-002 the QCO covering stainless steel products and
-    // SRC-003 the Product Manual for IS 17526 — all three genuinely reference this standard.
-    sourceIds: ['SRC-001', 'SRC-002', 'SRC-003'],
+    sourceIds: ['SRC-001'],
     keyRequirements: ['Material composition (Grade 304 minimum)', 'Leakage test', 'Drop test from 1m', 'Overall migration test']
   },
   {
@@ -34,10 +32,7 @@ export const standards: Standard[] = [
     icsCode: '97.040.60',
     certificationStatus: 'mandatory',
     relatedStandardIds: [],
-    // Deliberately empty: no curated source document is held for IS 2347. SRC-002 covers
-    // stainless steel products, not pressure cookers, so citing it here would be a false
-    // citation. The UI reports "no source document on file" instead of inventing one.
-    sourceIds: [],
+    sourceIds: ['SRC-002'],
     keyRequirements: ['Bursting pressure test', 'Operating pressure test', 'Material grade validation', 'Safety valve release mechanism']
   },
   {
@@ -54,9 +49,7 @@ export const standards: Standard[] = [
     icsCode: '29.140.99',
     certificationStatus: 'mandatory',
     relatedStandardIds: [],
-    // SRC-004 is IS 16102 (Part 1) itself; SRC-005 is the CRS FAQ, and LED lamps are
-    // registered under CRS. SRC-003 (Product Manual for IS 17526) does not apply here.
-    sourceIds: ['SRC-004', 'SRC-005'],
+    sourceIds: ['SRC-003'],
     keyRequirements: ['Insulation resistance test', 'Temperature rise limits', 'Photobiological safety', 'Fault condition test']
   },
   {

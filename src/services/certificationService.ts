@@ -8,6 +8,7 @@ import {
   CertificationScheme,
   ConfidenceLevel,
   GlossaryTerm,
+  ProductIdentification,
   SchemeCode,
   Standard,
   StandardRecommendation
@@ -281,13 +282,31 @@ function contextualiseStages(
 /**
  * Suggest standards for a described product.
  *
- * `searchStandards` now expands the query with the keywords `identifyProduct` derives from
- * it, so a phrase a manufacturer would actually type ("LED bulb" against "Self-Ballasted
- * LED Lamps") resolves inside the search service. This used to re-run the search once per
- * keyword to work around that; the retry is gone rather than duplicated here.
+ * `searchStandards` matches the query as one substring, so a phrase a manufacturer would
+ * actually type ("LED bulb" against "Self-Ballasted LED Lamps") finds nothing. When the
+ * phrase comes back empty we retry with the keywords `identifyProduct` derived from it,
+ * rather than leaving the user at a dead end. Search itself is not reimplemented here.
  */
-function suggestStandards(matches: StandardRecommendation[]): StandardRecommendation[] {
-  return matches.slice(0, 3);
+async function suggestStandards(
+  product: string,
+  phraseMatches: StandardRecommendation[],
+  identified: ProductIdentification
+): Promise<StandardRecommendation[]> {
+  if (phraseMatches.length > 0) return phraseMatches.slice(0, 3);
+
+  const terms = dedupe([...identified.keywords, identified.name, ...product.split(/\s+/)])
+    .filter((term) => term.length > 2)
+    .slice(0, 6);
+
+  const byKeyword = await Promise.all(terms.map((term) => searchStandards(term)));
+
+  const best = new Map<string, StandardRecommendation>();
+  for (const match of byKeyword.flat()) {
+    const existing = best.get(match.standard.id);
+    if (!existing || match.relevanceScore > existing.relevanceScore) best.set(match.standard.id, match);
+  }
+
+  return [...best.values()].sort((a, b) => b.relevanceScore - a.relevanceScore).slice(0, 3);
 }
 
 /**
@@ -311,7 +330,7 @@ export async function getCertificationPlan(request: CertificationPlanRequest): P
       productCategory: request.category ?? standard.category
     };
   } else if (request.product) {
-    const [identified, search] = await Promise.all([
+    const [identified, phraseMatches] = await Promise.all([
       identifyProduct(request.product),
       searchStandards(request.product)
     ]);
@@ -319,7 +338,7 @@ export async function getCertificationPlan(request: CertificationPlanRequest): P
       origin: 'product',
       productName: identified.name,
       productCategory: request.category ?? identified.category,
-      suggestedStandards: suggestStandards(search.results)
+      suggestedStandards: await suggestStandards(request.product, phraseMatches, identified)
     };
   } else {
     context = { origin: 'none' };

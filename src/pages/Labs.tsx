@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { useNavigate, useSearchParams } from "react-router-dom";
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from "react-router-dom";
 import { FlaskConical } from "lucide-react";
 import { PageHeader } from '../components/ui/PageHeader';
 import { LaboratoryCard } from '../components/common/LaboratoryCard';
@@ -8,23 +8,18 @@ import { EmptyState } from '../components/ui/EmptyState';
 import { ErrorState } from '../components/ui/ErrorState';
 import { SkeletonCard } from '../components/ui/LoadingSkeleton';
 import { Select } from '../components/ui/Select';
-import { searchLaboratories, getLabStandardOptions } from '../services/laboratoryService';
+import { searchLaboratories } from '../services/laboratoryService';
 import { Laboratory } from '../types';
 
 export default function Labs() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
   const [labs, setLabs] = useState<Laboratory[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedState, setSelectedState] = useState('');
-  // A standard arriving from the Standards workflow seeds the filter, then the page owns it:
-  // changing the dropdown afterwards is not fought by the URL.
-  const [selectedStandard, setSelectedStandard] = useState(
-    () => searchParams.get('standardId') ?? ''
-  );
+  const [selectedStandard, setSelectedStandard] = useState('');
 
   const fetchLabs = async () => {
     setLoading(true);
@@ -62,14 +57,11 @@ export default function Labs() {
     { value: 'uttar pradesh', label: 'Uttar Pradesh' },
   ];
 
-  const labStandards = useMemo(() => getLabStandardOptions(), []);
-
   const standardOptions = [
     { value: 'all', label: 'All Standards' },
-    ...labStandards.map((option) => ({
-      value: option.value,
-      label: `${option.label} (${option.labCount})`
-    }))
+    { value: 'IS 17803:2022', label: 'IS 17803:2022' },
+    { value: 'IS 9873', label: 'IS 9873 (Toys)' },
+    { value: 'IS 14625', label: 'IS 14625 (Plastics)' },
   ];
 
   return (
