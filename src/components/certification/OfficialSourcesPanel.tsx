@@ -2,6 +2,7 @@ import React from 'react';
 import { BookMarked, ExternalLink } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { getCertificationSources } from '../../data/certificationSources';
+import { useTranslation } from '../../hooks/useTranslation';
 
 export interface OfficialSourcesPanelProps {
   sourceIds: string[];
@@ -9,19 +10,15 @@ export interface OfficialSourcesPanelProps {
   limit?: number;
 }
 
-const TYPE_LABEL: Record<string, string> = {
-  regulation: 'Regulation',
-  guideline: 'Guideline',
-  notification: 'Notification',
-  website: 'BIS page',
-  standard: 'Standard'
-};
+/** Source types with a localized label; anything else falls back to its raw type. */
+const KNOWN_TYPES = ['regulation', 'guideline', 'notification', 'website', 'standard'];
 
 /**
  * Every claim on this page is traceable. This panel is the "what sources support these
  * answers?" question, answered with real links to bis.gov.in / crsbis.in only.
  */
 export const OfficialSourcesPanel: React.FC<OfficialSourcesPanelProps> = ({ sourceIds, limit = 8 }) => {
+  const { t } = useTranslation();
   const sources = getCertificationSources(sourceIds);
   if (sources.length === 0) return null;
 
@@ -32,10 +29,10 @@ export const OfficialSourcesPanel: React.FC<OfficialSourcesPanelProps> = ({ sour
     <Card className="p-5">
       <div className="mb-1 flex items-center gap-2">
         <BookMarked className="h-4 w-4 text-blue-900" />
-        <h3 className="text-sm font-bold text-gray-900">Official sources</h3>
+        <h3 className="text-sm font-bold text-gray-900">{t('certification.sources.title')}</h3>
       </div>
       <p className="mb-3 text-xs text-gray-500">
-        Only bis.gov.in, crsbis.in and the BIS portals — nothing on this page comes from a blog.
+        {t('certification.sources.desc')}
       </p>
 
       <ul className="space-y-3">
@@ -54,8 +51,8 @@ export const OfficialSourcesPanel: React.FC<OfficialSourcesPanelProps> = ({ sour
                 <ExternalLink className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-gray-400 group-hover:text-blue-900" />
               </span>
               <span className="mt-1 block text-xs text-gray-500">
-                {TYPE_LABEL[source.type] ?? source.type}
-                {source.page ? ` · page ${source.page}` : ''} · {source.documentName}
+                {KNOWN_TYPES.includes(source.type) ? t(`certification.sources.typeLabel.${source.type}`) : source.type}
+                {source.page ? ` · ${t('certification.sources.page')} ${source.page}` : ''} · {source.documentName}
               </span>
             </a>
           </li>
@@ -64,7 +61,7 @@ export const OfficialSourcesPanel: React.FC<OfficialSourcesPanelProps> = ({ sour
 
       {remaining > 0 && (
         <p className="mt-3 text-xs text-gray-500">
-          {remaining} more source{remaining === 1 ? '' : 's'} are cited inside the individual steps above.
+          {remaining} {t(remaining === 1 ? 'certification.sources.moreOne' : 'certification.sources.moreMany')}
         </p>
       )}
     </Card>

@@ -2,6 +2,7 @@ import React from 'react';
 import { Search } from 'lucide-react';
 import { Button } from './Button';
 import { cn } from '../../utils/helpers';
+import { useTranslation } from '../../hooks/useTranslation';
 
 export interface SearchBarProps {
   placeholder?: string;
@@ -14,14 +15,15 @@ export interface SearchBarProps {
 }
 
 export const SearchBar: React.FC<SearchBarProps> = ({
-  placeholder = "Search...",
+  placeholder,
   value,
   onChange,
   onSearch,
-  buttonText = "Search",
+  buttonText,
   size = 'md',
   className
 }) => {
+  const { t } = useTranslation();
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       onSearch();
@@ -45,19 +47,19 @@ export const SearchBar: React.FC<SearchBarProps> = ({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder={placeholder}
+          placeholder={placeholder ?? t('common.searchPlaceholder')}
           className={cn(
             "block w-full rounded-l-lg border-gray-300 pl-11 focus:ring-blue-900 focus:border-blue-900 shadow-sm",
             sizes[size]
           )}
         />
       </div>
-      <Button 
+      <Button
         onClick={onSearch}
-        size={size as any} 
+        size={size as any}
         className="rounded-l-none rounded-r-lg whitespace-nowrap shadow-sm"
       >
-        {buttonText}
+        {buttonText ?? t('common.search')}
       </Button>
     </div>
   );

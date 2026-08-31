@@ -23,11 +23,19 @@ interface MessageRow {
   created_at: string;
 }
 
+export interface AssistantContext {
+  /**
+   * A standard the user was reading when they asked, arriving as `/ask?standardId=<id>`.
+   * The assistant keeps its own answering logic; this only tells it what the question is
+   * about so the conversation continues instead of restarting.
+   */
+  standardId?: string;
+}
+
 function requireInsForge() {
   if (!insforge) {
     throw new Error('BIS assistant backend is not configured.');
   }
-
   return insforge;
 }
 
@@ -41,11 +49,11 @@ function mapConversation(row: ConversationRow): AssistantConversation {
   };
 }
 
-export async function askQuestion(question: string, language: Language): Promise<AssistantResponse> {
+export async function askQuestion(question: string, language: Language, context?: AssistantContext): Promise<AssistantResponse> {
   const client = requireInsForge();
 
   const { data, error } = await client.functions.invoke('ask-bis', {
-    body: { question, language },
+    body: { question, language, standardId: context?.standardId },
   });
 
   if (error) {
