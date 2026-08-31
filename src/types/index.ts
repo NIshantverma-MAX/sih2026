@@ -52,10 +52,17 @@ export type CertificationStatus = 'mandatory' | 'voluntary' | 'self-declaration'
 export interface StandardRecommendation {
   standard: Standard;
   relevanceScore: number;
-  relevance: 'high' | 'medium' | 'low';
+  relevance: RelevanceLevel;
   matchType?: 'primary' | 'alternative' | 'related';
   matchReasons: string[];
   evidenceIds?: string[];
+  /**
+   * Structured form of `matchReasons`. `matchReasons` stays the rendered English sentence
+   * (the assistant and docs/API_CONTRACT.md already consume it); signals carry the stable
+   * key, the matched term and the points contributed, so the UI can localise the
+   * explanation and show the score arithmetic instead of asserting a number.
+   */
+  matchSignals?: MatchSignal[];
 }
 
 export interface ProductIdentification {
@@ -66,6 +73,133 @@ export interface ProductIdentification {
   confidence: number;
   keywords: string[];
   isAmbiguous?: boolean;
+  /**
+   * Whether the query actually matched a known product, as opposed to being echoed back
+   * because nothing was recognised. Distinct from `datasetCategories` being empty: a
+   * product can be identified confidently and still map to no category in this dataset.
+   */
+  identified?: boolean;
+  /**
+   * `category` is the human-readable label shown to the user. Categories that actually
+   * exist in the standards dataset are listed here, so filters and scoring can use them
+   * without inventing a taxonomy. Empty when the query maps to nothing in the dataset.
+   */
+  datasetCategories?: string[];
+}
+
+// ---------------------------------------------------------------------------
+// Standards intelligence — discovery, relevance, evidence.
+// Additive: `Standard`, `StandardRecommendation` and `SearchFilters` keep working for
+// the assistant, the certification planner and the documented API contract.
+// ---------------------------------------------------------------------------
+
+export type RelevanceLevel = 'high' | 'medium' | 'low';
+
+/** Which field of the standard matched, and how much it contributed to the score. */
+export interface MatchSignal {
+  key: MatchSignalKey;
+  /** The term that matched, shown verbatim — never translated. */
+  term: string;
+  /** Points this signal added to the relevance score. */
+  weight: number;
+}
+
+export type MatchSignalKey =
+  | 'standard-number'
+  | 'title'
+  | 'scope'
+  | 'description'
+  | 'requirement'
+  | 'category'
+  | 'sector'
+  /** The product category inferred from the query matched this standard's category. */
+  | 'product-category';
+
+export type StandardsSortOption = 'relevance' | 'latest' | 'alphabetical' | 'standard-number';
+
+export interface StandardsSearchOptions {
+  /** 1-based. */
+  page?: number;
+  pageSize?: number;
+  sort?: StandardsSortOption;
+}
+
+/**
+ * Paged search envelope, shaped after `GET /standards` in docs/API_CONTRACT.md so an
+ * HTTP-backed service can replace the mock one without the page changing.
+ */
+export interface StandardsSearchResult {
+  query: string;
+  product: ProductIdentification | null;
+  results: StandardRecommendation[];
+  /** Matches after filtering, before pagination. */
+  total: number;
+  /** Matches before filtering — lets the UI say "filters hid N of M". */
+  totalBeforeFilters: number;
+  page: number;
+  pageSize: number;
+  hasMore: boolean;
+  /** Alternative queries to offer when nothing matched. */
+  suggestions: string[];
+}
+
+/** How a related standard was arrived at, so the UI never implies BIS declared it. */
+export type RelationBasis = 'declared' | 'same-ics-group' | 'same-category';
+
+export interface RelatedStandard {
+  standard: Standard;
+  basis: RelationBasis;
+  /** e.g. "77.140" or "Household · Mechanical". Shown next to the relation. */
+  basisDetail: string;
+}
+
+/**
+ * Evidence held for one standard. `citations` are curated documents carrying real clause
+ * or section references; `documentReference` only points at the standard's own catalogue
+ * entry. The UI must not present the second as clause-level proof.
+ */
+export interface StandardEvidence {
+  standardId: string;
+  citations: SourceCitation[];
+  documentReference: SourceCitation | null;
+  hasClauseLevelEvidence: boolean;
+  /** Locale key under `standards.evidence.note`. Prose lives in the locale files. */
+  noteKey: 'clause-level' | 'document-only' | 'none';
+}
+
+/** Revision position of a standard. Never fabricates a superseding standard or id. */
+export interface LatestVersionInfo {
+  state: 'current' | 'under-revision' | 'withdrawn';
+  /** Only set when a superseding standard is actually recorded in the dataset. */
+  supersededBy: Standard | null;
+  /** Official page on which to confirm the current revision. */
+  verifyUrl: string;
+}
+
+/** The weighting table behind the score, published so the ranking is auditable. */
+export interface SignalWeightExplanation {
+  key: MatchSignalKey;
+  /** Points a full-phrase match on this field contributes. */
+  weight: number;
+}
+
+export interface RecommendationAnalysis {
+  query: string;
+  product: ProductIdentification;
+  /** The terms actually searched on, after keyword expansion. */
+  interpretedTerms: string[];
+  signalWeights: SignalWeightExplanation[];
+  thresholds: { high: number; medium: number };
+  topMatches: {
+    standardId: string;
+    standardNumber: string;
+    title: string;
+    score: number;
+    relevance: RelevanceLevel;
+    signals: MatchSignal[];
+  }[];
+  /** Locale keys under `standards.analysis.limitation`. */
+  limitationKeys: string[];
 }
 
 // Certification types
@@ -369,8 +503,16 @@ export interface SearchFilters {
   sector?: string;
   status?: StandardStatus;
   certificationStatus?: CertificationStatus;
-  relevance?: 'high' | 'medium' | 'low';
-  sortBy?: 'relevance' | 'latest' | 'alphabetical';
+  relevance?: RelevanceLevel;
+  /**
+   * ICS subject group — the first two segments of `Standard.icsCode` (e.g. "77.140").
+   * A real classification already carried by the data, so no taxonomy is invented.
+   */
+  icsGroup?: string;
+  /** Excludes standards that are withdrawn or under revision. */
+  latestRevisionOnly?: boolean;
+  /** Legacy. New callers pass sort through `StandardsSearchOptions.sort`. */
+  sortBy?: StandardsSortOption;
 }
 
 export interface LabFilters {

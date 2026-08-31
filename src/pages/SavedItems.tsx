@@ -18,8 +18,11 @@ export default function SavedItems() {
 
   const handleNavigate = (type: string, id: string) => {
     switch (type) {
-      case 'standard': navigate(`/standards`); break;
-      case 'laboratory': navigate(`/laboratories`); break;
+      // Each saved item carries the id of the thing it points at, so it opens that thing
+      // rather than the list it came from. `laboratory` previously navigated to
+      // `/laboratories`, which is not a route and landed on the not-found page.
+      case 'standard': navigate(`/standards/${id}`); break;
+      case 'laboratory': navigate(`/labs/${id}`); break;
       case 'query': navigate(`/my-queries`); break;
       default: break;
     }
