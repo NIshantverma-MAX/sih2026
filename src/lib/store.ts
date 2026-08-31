@@ -51,9 +51,19 @@ export const useStore = create<AppState>()(
       setLanguage: (language) => set({ language }),
       
       savedItems: [],
-      addSavedItem: (item) => set((state) => ({ savedItems: [...state.savedItems, item] })),
-      removeSavedItem: (id) => set((state) => ({ savedItems: state.savedItems.filter(i => i.id !== id) })),
-      isSaved: (itemId) => get().savedItems.some(i => i.itemId === itemId),
+      // Bookmark toggles across the app pass the *subject's* id (e.g. "STD-001"), while the
+      // Saved Items page passes the saved-row id. Both are accepted here so a card's
+      // bookmark button can actually un-save; previously only the row id matched and
+      // toggling a bookmark off did nothing.
+      addSavedItem: (item) => set((state) =>
+        state.savedItems.some(i => i.itemId === item.itemId && i.type === item.type)
+          ? state
+          : { savedItems: [...state.savedItems, item] }
+      ),
+      removeSavedItem: (id) => set((state) => ({
+        savedItems: state.savedItems.filter(i => i.id !== id && i.itemId !== id)
+      })),
+      isSaved: (itemId) => get().savedItems.some(i => i.itemId === itemId || i.id === itemId),
       
       notifications: mockNotifications,
       markAsRead: (id) => set((state) => ({

@@ -4,9 +4,22 @@ import { sources } from '../data/sources';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-export async function askQuestion(question: string, language: Language): Promise<AssistantResponse> {
+export interface AssistantContext {
+  /**
+   * A standard the user was reading when they asked, arriving as `/ask?standardId=<id>`.
+   * The assistant keeps its own answering logic; this only tells it what the question is
+   * about so the conversation continues instead of restarting.
+   */
+  standardId?: string;
+}
+
+export async function askQuestion(
+  question: string,
+  language: Language,
+  context?: AssistantContext
+): Promise<AssistantResponse> {
   await delay(2000);
-  
+
   const q = question.toLowerCase();
   let answer = '';
   let matchedStandards: StandardRecommendation[] = [];
@@ -58,6 +71,51 @@ export async function askQuestion(question: string, language: Language): Promise
       : 'Thank you for your question about BIS standards and certification. Please describe your product in detail so we can provide you with the right standards and guidance.';
   }
 
+  // The standard carried in from the Standards workflow. Its number and title are read
+  // from the dataset rather than restated in prose, so the opening line cannot drift from
+  // the record the details page showed.
+  const contextStandard = context?.standardId
+    ? standards.find((s) => s.id === context.standardId)
+    : undefined;
+
+  if (contextStandard) {
+    answer =
+      (language === 'hi'
+        ? `संदर्भ: ${contextStandard.standardNumber} — ${contextStandard.title}`
+        : `Context: ${contextStandard.standardNumber} — ${contextStandard.title}`) +
+      `\n\n${answer}`;
+
+    if (!matchedStandards.some((m) => m.standard.id === contextStandard.id)) {
+      matchedStandards = [
+        {
+          standard: contextStandard,
+          relevanceScore: 100,
+          relevance: 'high',
+          matchType: 'primary',
+          matchReasons: [
+            language === 'hi'
+              ? 'यह वही मानक है जिसे आपने खोला था (यह कोई खोज रैंकिंग नहीं है)।'
+              : 'This is the standard you opened — not a search ranking.'
+          ]
+        },
+        ...matchedStandards
+      ];
+    }
+  }
+
+  /**
+   * Citations for a question asked about a specific standard: only that standard's own
+   * documents, and nothing at all when it has none recorded.
+   *
+   * The generic fallback below serves the first few documents in the catalogue, which is
+   * acceptable for an open question but not for one anchored to a standard — several
+   * standards in this dataset carry no `sourceIds`, and falling back there attributed
+   * another standard's Quality Control Order and Product Manual to this answer.
+   */
+  const contextSources = contextStandard
+    ? sources.filter((s) => contextStandard.sourceIds.includes(s.id))
+    : [];
+
   return {
     answer,
     product: q.includes('water') || q.includes('bottle') ? {
@@ -74,7 +132,9 @@ export async function askQuestion(question: string, language: Language): Promise
       timeline: '4-6 months',
     },
     warnings: ['This is AI-generated guidance. Please verify with official BIS sources for the most current information.'],
-    sources: sources.slice(0, 3),
+    sources: contextStandard
+      ? (contextSources.length > 0 ? contextSources : undefined)
+      : sources.slice(0, 3),
   };
 }
 
