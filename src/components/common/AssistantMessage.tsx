@@ -21,17 +21,17 @@ export const AssistantMessage: React.FC<AssistantMessageProps> = ({ message }) =
   const hasStructuredAnswer = !isUser && Boolean(response?.summary && response?.title);
 
   return (
-    <div className={cn('mb-6 flex w-full min-w-0', isUser ? 'justify-end' : 'justify-start')}>
-      <div className={cn('flex w-full min-w-0 max-w-3xl', isUser ? 'flex-row-reverse' : 'flex-row')}>
+    <div className={cn('mb-6 flex w-full min-w-0 overflow-hidden', isUser ? 'justify-end' : 'justify-start')}>
+      <div className={cn('flex w-full min-w-0 max-w-full sm:max-w-3xl', isUser ? 'flex-row-reverse' : 'flex-row')}>
         <div className={cn(
           'flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full',
-          isUser ? 'ml-3 bg-blue-900 text-white' : 'mr-3 bg-blue-100 text-blue-900',
+          isUser ? 'ml-2 bg-blue-900 text-white sm:ml-3' : 'mr-2 bg-blue-100 text-blue-900 sm:mr-3',
         )}>
           {isUser ? <User className="h-5 w-5" /> : <Bot className="h-5 w-5" />}
         </div>
 
         <div className={cn(
-          'min-w-0 max-w-[calc(100%-2.75rem)] break-words rounded-lg px-5 py-4 shadow-sm',
+          'min-w-0 max-w-[calc(100%-2.5rem)] overflow-hidden break-words rounded-lg px-4 py-4 shadow-sm sm:max-w-[calc(100%-2.75rem)] sm:px-5',
           isUser
             ? 'rounded-tr-none bg-blue-900 text-white'
             : 'rounded-tl-none border border-gray-200 bg-white text-gray-800',

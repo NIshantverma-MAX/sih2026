@@ -2,14 +2,11 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Bell, CheckCircle, Info, AlertTriangle } from 'lucide-react';
 import { useAppStore } from '../../lib/store';
 import { cn, formatDate } from '../../utils/helpers';
-import { useNavigate } from 'react-router-dom';
 
 export const NotificationMenu: React.FC = () => {
   const { notifications, markAsRead } = useAppStore();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const navigate = useNavigate();
-
   const unreadCount = notifications.filter(n => !n.read).length;
 
   useEffect(() => {
@@ -38,8 +35,10 @@ export const NotificationMenu: React.FC = () => {
   return (
     <div className="relative inline-block" ref={dropdownRef}>
       <button
+        type="button"
+        aria-label="Open notifications"
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-colors focus:outline-none"
+        className="relative min-h-10 min-w-10 rounded-full p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 focus:outline-none"
       >
         <Bell className="w-5 h-5" />
         {unreadCount > 0 && (
@@ -48,7 +47,7 @@ export const NotificationMenu: React.FC = () => {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 w-80 mt-2 origin-top-right bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-50">
+        <div className="absolute right-0 z-50 mt-2 w-[calc(100vw-1rem)] max-w-80 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
           <div className="px-4 py-3 border-b border-gray-100 flex justify-between items-center">
             <h3 className="text-sm font-semibold text-gray-900">Notifications</h3>
             {unreadCount > 0 && (

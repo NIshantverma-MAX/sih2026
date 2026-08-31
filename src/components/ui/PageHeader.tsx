@@ -18,8 +18,8 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
   actions
 }) => {
   return (
-    <div className="mb-8 flex flex-col md:flex-row md:items-start justify-between gap-4">
-      <div>
+    <div className="mb-6 flex min-w-0 flex-col justify-between gap-4 sm:mb-8 md:flex-row md:items-start">
+      <div className="min-w-0">
         {backTo && (
           <Link 
             to={backTo} 
@@ -29,11 +29,11 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
             {backLabel}
           </Link>
         )}
-        <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">{title}</h1>
+        <h1 className="break-words text-2xl font-bold text-gray-900 sm:text-3xl">{title}</h1>
         {subtitle && <p className="mt-2 text-sm text-gray-600 max-w-3xl">{subtitle}</p>}
       </div>
       {actions && (
-        <div className="flex flex-shrink-0 items-center gap-3">
+        <div className="flex flex-shrink-0 flex-wrap items-center gap-3">
           {actions}
         </div>
       )}

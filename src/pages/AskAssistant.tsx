@@ -244,7 +244,7 @@ function AssistantChat() {
   const isChatBusy = isLoading || isHistoryLoading;
 
   return (
-    <div className="flex h-[calc(100vh-6rem)] min-h-[34rem] flex-col">
+    <div className="flex h-[calc(100dvh-7.5rem)] min-h-[30rem] flex-col sm:h-[calc(100dvh-7rem)] lg:h-[calc(100dvh-6rem)] lg:min-h-[34rem]">
       <PageHeader
         title="Ask BIS SmartGuide"
         subtitle="Your AI assistant for BIS-related queries."
@@ -337,7 +337,7 @@ function AssistantChat() {
             </div>
           )}
 
-          <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-6">
+          <div className="min-h-0 flex-1 overflow-y-auto p-3 sm:p-6">
             {isHistoryLoading && selectedConversationId ? (
               <div className="flex h-full items-center justify-center text-gray-500">
                 <Loader2 className="h-6 w-6 animate-spin" aria-label="Loading conversation" />
@@ -350,7 +350,7 @@ function AssistantChat() {
                 ))}
                 {isLoading && (
                   <div className="flex justify-start">
-                    <div className="max-w-[80%] rounded-2xl rounded-tl-sm border bg-white p-4 shadow-sm">
+                    <div className="max-w-[calc(100%-2.75rem)] rounded-2xl rounded-tl-sm border bg-white p-4 shadow-sm sm:max-w-[80%]">
                       <div className="flex h-6 items-center space-x-2" aria-label="BIS SmartGuide is responding">
                         <div className="h-2 w-2 animate-bounce rounded-full bg-gray-400" />
                         <div className="h-2 w-2 animate-bounce rounded-full bg-gray-400 [animation-delay:150ms]" />
@@ -364,7 +364,7 @@ function AssistantChat() {
             )}
           </div>
 
-          <div className="border-t border-gray-200 bg-white p-3 sm:p-4">
+          <div className="border-t border-gray-200 bg-white p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:p-4">
             <div className="flex gap-2">
               <Input
                 value={query}

@@ -320,7 +320,7 @@ export default function Standards() {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="min-w-0 space-y-6">
       <PageHeader
         title={t('standards.title')}
         subtitle={t('standards.subtitle')}
@@ -328,11 +328,11 @@ export default function Standards() {
         backLabel={t('standards.backToHome')}
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div className="grid min-w-0 grid-cols-1 gap-6 lg:grid-cols-4">
         {/* Main Content Area */}
-        <div className="lg:col-span-3 space-y-6">
+        <div className="min-w-0 space-y-6 lg:col-span-3">
           {/* Search and Filters */}
-          <Card className="p-4 bg-white shadow-sm flex flex-col md:flex-row gap-4">
+          <Card className="flex min-w-0 flex-col gap-4 bg-white p-4 shadow-sm md:flex-row">
             <StandardsSearch
               value={standardsQuery}
               onChange={setStandardsQuery}
@@ -340,7 +340,7 @@ export default function Standards() {
               onClear={handleClear}
               busy={loading}
             />
-            <div className="flex flex-wrap gap-2 md:items-start">
+            <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:flex-wrap md:items-start">
               <div className="w-full sm:w-48">
                 <Select
                   aria-label={t('standards.sortLabel')}
@@ -360,7 +360,7 @@ export default function Standards() {
                 icon={SlidersHorizontal}
                 onClick={() => setShowFilters(true)}
                 aria-expanded={showFilters}
-                className="h-10 flex-shrink-0"
+                className="h-10 w-full flex-shrink-0 sm:w-auto"
               >
                 {t('standards.openFilters')}
                 {activeFilterCount > 0 && (

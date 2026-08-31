@@ -42,9 +42,9 @@ export default function Home() {
   ];
 
   return (
-    <div className="space-y-4 max-w-[1360px] mx-auto pb-12">
+    <div className="mx-auto w-full max-w-[1360px] space-y-4 pb-10 sm:pb-12">
       {/* Hero Section */}
-      <section className="bg-white rounded-2xl shadow-sm overflow-hidden min-h-[440px] lg:min-h-[558.031px] relative border border-slate-200">
+      <section className="relative min-h-0 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm sm:rounded-2xl lg:min-h-[558.031px]">
         
         {/* Background Geometric Pattern */}
         <div className="absolute inset-0 z-0 bg-[#f4f7fc]" 
@@ -55,9 +55,9 @@ export default function Home() {
              }}>
         </div>
 
-        <div className="flex flex-col lg:flex-row h-full relative z-10 min-h-[440px] lg:min-h-[558.031px]">
+        <div className="relative z-10 flex h-full min-h-0 flex-col lg:min-h-[558.031px] lg:flex-row">
           
-          <div className="w-full lg:w-[65%] p-8 lg:p-12 flex flex-col justify-center relative">
+          <div className="relative flex w-full flex-col justify-center p-5 sm:p-8 lg:w-[65%] lg:p-12">
             {/* The white diagonal cut covering the image edge */}
             <div className="hidden lg:block absolute top-0 -right-16 bottom-0 w-32 bg-transparent z-20 pointer-events-none"
                  style={{ 
@@ -65,47 +65,49 @@ export default function Home() {
                  }}>
             </div>
 
-            <div className="relative z-30 mb-8 max-w-[600px]">
-              <h1 className="text-[30px] lg:text-[34px] font-extrabold text-[#0c1a3b] leading-[1.15] mb-3 tracking-tight">
-                BUREAU OF INDIAN STANDARDS: <br/>
-                <span className="text-[#1e293b]">National Standards &amp; Compliance Portal</span>
+            <div className="relative z-30 mb-6 max-w-[600px] sm:mb-8">
+              <h1 className="mb-3 text-[22px] font-extrabold leading-[1.15] tracking-tight text-[#0c1a3b] sm:text-[30px] lg:text-[34px]">
+                <span className="block">BUREAU OF INDIAN</span>
+                <span className="block">STANDARDS:</span>
+                <span className="block text-[#1e293b]">National Standards</span>
+                <span className="block text-[#1e293b]">&amp; Compliance Portal</span>
               </h1>
               <p className="text-[14px] text-slate-600 font-medium mb-1">
                 Official Access to QCOs, Product Manuals, IS Codes, and Laboratory Recognition.
               </p>
-              <p className="text-[12.5px] text-slate-400">
+              <p className="max-w-[18rem] text-[12.5px] text-slate-400 sm:max-w-none">
                 National Standards &amp; Compliance Portal | Powered by BIS SmartGuide AI.
               </p>
             </div>
             
-            <div className="bg-white px-7 py-6 rounded-2xl shadow-[0_4px_24px_rgb(0,0,0,0.06)] relative z-30 max-w-[680px]">
-              <h3 className="text-[14.5px] font-bold text-slate-900 mb-4">Search across 20,000+ Indian Standards &amp; Mandatory Procedures.</h3>
+            <div className="relative z-30 max-w-[680px] rounded-xl bg-white px-4 py-5 shadow-[0_4px_24px_rgb(0,0,0,0.06)] sm:rounded-2xl sm:px-7 sm:py-6">
+              <h3 className="mb-4 text-[14px] font-bold leading-5 text-slate-900 sm:text-[14.5px]">Search Indian Standards and mandatory procedures.</h3>
               <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-3">
-                <div className="relative flex-1 flex items-center bg-white border border-slate-200 rounded-xl focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-indigo-500 overflow-hidden h-[50px]">
+                <div className="relative flex h-[50px] min-w-0 flex-1 items-center overflow-hidden rounded-xl border border-slate-200 bg-white focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500">
                   <div className="pl-4 pr-2 flex items-center justify-center text-slate-400">
                     <Search size={18} className="search-icon" />
                   </div>
                   <input
-                    className="flex-1 h-full outline-none text-slate-900 bg-transparent placeholder-slate-400 text-[14.5px]"
-                    placeholder="e.g., IS Code (IS 694), Product Name (Heater), or Procedure Keyword..."
+                    className="h-full min-w-0 flex-1 bg-transparent text-[14px] text-slate-900 outline-none placeholder-slate-400 sm:text-[14.5px]"
+                    placeholder="e.g., IS 694, helmet, water purifier..."
                     value={localQuery}
                     onChange={(e) => setLocalQuery(e.target.value)}
                   />
                 </div>
-                <Button type="submit" disabled={!localQuery.trim()} className="bg-[#7886a8] hover:bg-[#637295] disabled:opacity-70 disabled:cursor-not-allowed text-white whitespace-nowrap px-6 h-[50px] rounded-xl font-medium text-[14.5px] shadow-sm transition-colors">
+                <Button type="submit" disabled={!localQuery.trim()} className="h-[50px] w-full rounded-xl bg-[#7886a8] px-6 text-[14.5px] font-medium whitespace-nowrap text-white shadow-sm transition-colors hover:bg-[#637295] disabled:cursor-not-allowed disabled:opacity-70 sm:w-auto">
                   Official Search
                 </Button>
               </form>
               
               <div className="mt-5">
-                <p className="text-[11.5px] font-bold text-slate-800 mb-2.5">Popular searches: Featured IS Codes &amp; Common Procedures</p>
+                <p className="mb-2.5 text-[11.5px] font-bold leading-4 text-slate-800">Popular searches</p>
                 <div className="flex flex-wrap gap-2.5 items-center">
                   {popularSearches.map(item => (
                     <button
                       key={item.query}
                       type="button"
                       onClick={() => handlePopularSearch(item.query)}
-                      className="text-[12px] px-3.5 py-1.5 rounded-full bg-white border border-slate-200 text-slate-500 hover:border-indigo-300 hover:text-indigo-700 hover:bg-indigo-50 transition-colors font-medium shadow-sm whitespace-nowrap"
+                    className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[12px] font-medium text-slate-500 shadow-sm transition-colors hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-700 sm:px-3.5"
                     >
                       {item.label}
                     </button>
@@ -115,23 +117,23 @@ export default function Home() {
             </div>
           </div>
           
-          <div className="hidden lg:block relative w-[35%] h-[558.031px] bg-slate-100 overflow-hidden shrink-0">
-             <div className="absolute inset-0 bg-white" style={{ clipPath: 'polygon(0 0, 8% 0, 0 100%)', zIndex: 10 }}></div>
-             <div className="absolute top-6 right-6 bg-white px-3 py-1.5 rounded-lg shadow-sm border border-slate-100 z-20 flex flex-col items-center">
+          <div className="relative h-64 w-full shrink-0 overflow-hidden bg-slate-100 sm:h-80 lg:h-[558.031px] lg:w-[35%]">
+             <div className="absolute inset-0 z-10 hidden bg-white lg:block" style={{ clipPath: 'polygon(0 0, 8% 0, 0 100%)' }}></div>
+             <div className="absolute right-4 top-4 z-20 hidden flex-col items-center rounded-lg border border-slate-100 bg-white px-3 py-1.5 shadow-sm sm:right-6 sm:top-6 lg:flex">
                <img src="/bis-logo.png" alt="Govt of India" className="h-4 w-auto mb-1 opacity-90" />
                <span className="text-[9px] font-bold text-blue-900 tracking-tight">Govt of India (GOI)</span>
              </div>
             <img 
               src={bisHomeHeroImg}
               alt="Bureau of Indian Standards Building" 
-              className="w-full h-full object-cover"
-              style={{ objectPosition: '30% center' }}
+              className="h-full w-full object-cover"
+              style={{ objectPosition: '42% center' }}
             />
           </div>
         </div>
       </section>
 
-      <div className="text-center mt-1 mb-8">
+      <div className="mb-6 mt-1 text-center sm:mb-8">
         <p className="text-[11.5px] text-slate-400 font-semibold tracking-wide">A Service by the Bureau of Indian Standards, Govt of India.</p>
       </div>
 
@@ -141,7 +143,7 @@ export default function Home() {
         {/* Explore Services */}
         <section>
           <h2 className="text-[20px] font-bold text-slate-900 mb-4">Explore Services</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 h-[calc(100%-48px)]">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 lg:h-[calc(100%-48px)]">
             {services.map((service, idx) => (
               <Card 
                 key={idx} 
@@ -165,7 +167,7 @@ export default function Home() {
 
         {/* Recent Queries */}
         <section>
-          <Card className="p-6 bg-white shadow-sm border border-slate-200 rounded-xl h-[calc(100%-12px)] mt-[44px]">
+          <Card className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6 lg:mt-[44px] lg:h-[calc(100%-12px)]">
             <div className="flex items-center justify-between mb-5">
               <h3 className="font-bold text-slate-900 text-[16px]">Recent Queries</h3>
               <button onClick={() => navigate('/my-queries')} className="text-[13px] font-semibold text-indigo-600 hover:underline">View All</button>

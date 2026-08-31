@@ -34,7 +34,9 @@ export const hi = {
       steelBottle: 'स्टील की बोतल',
       goldJewellery: 'सोने के आभूषण',
       pressureCooker: 'प्रेशर कुकर',
-      electricalSwitch: 'इलेक्ट्रिकल स्विच'
+      electricalSwitch: 'इलेक्ट्रिकल स्विच',
+      helmet: 'हेलमेट QCO',
+      textile: 'टेक्सटाइल प्रक्रियाएँ'
     },
     exploreServices: 'सेवाएं देखें',
     services: {
@@ -108,6 +110,7 @@ export const hi = {
   },
   common: {
     general: 'सामान्य',
-    explore: 'देखें'
+    explore: 'देखें',
+    cancel: 'रद्द करें'
   }
 };

@@ -125,37 +125,43 @@ const AppLayout = () => {
   );
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] flex flex-col">
+    <div className="flex min-h-screen min-h-dvh flex-col bg-[#f8fafc]">
       {isMobileMenuOpen && (
-        <div 
-          className="fixed inset-0 bg-gray-900/50 z-40 md:hidden"
+        <div
+          className="fixed inset-0 z-40 bg-gray-900/50 md:hidden"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
 
-      <header className="bg-white border-b border-gray-200 h-[64px] flex items-center justify-between px-4 md:px-6 z-30 shrink-0 shadow-sm relative">
-        <div className="flex items-center gap-3">
-          <button 
-            className="md:hidden p-2 text-gray-500 hover:bg-gray-100 rounded-lg mr-2"
+      <header className="relative z-30 flex min-h-16 shrink-0 items-center justify-between gap-2 border-b border-gray-200 bg-white px-3 py-2 shadow-sm md:px-6">
+        <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+          <button
+            type="button"
+            aria-label="Open navigation menu"
+            className="min-h-10 min-w-10 rounded-lg p-2 text-gray-500 hover:bg-gray-100 md:hidden"
             onClick={() => setIsMobileMenuOpen(true)}
           >
             <Menu className="w-5 h-5" />
           </button>
           
-          <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
-            <div className="flex items-center justify-center pt-0.5">
-              <img src="/bis-logo.png" alt="BIS Logo" className="h-10 w-auto object-contain" />
+          <button
+            type="button"
+            className="flex min-w-0 items-center gap-2 rounded-lg text-left focus:outline-none focus:ring-2 focus:ring-blue-900 focus:ring-offset-2 sm:gap-3"
+            onClick={() => navigate('/')}
+          >
+            <div className="flex shrink-0 items-center justify-center pt-0.5">
+              <img src="/bis-logo.png" alt="BIS Logo" className="h-8 w-auto object-contain sm:h-10" />
             </div>
             <div className="hidden sm:block">
               <h1 className="text-[17px] font-extrabold text-[#0c1a3b] leading-tight tracking-tight">Bureau of Indian Standards</h1>
               <p className="text-[11px] text-slate-500 font-medium">The National Standards Body of India</p>
             </div>
-          </div>
+          </button>
         </div>
 
-        <div className="flex items-center gap-4 flex-1 justify-center max-w-2xl px-4">
+        <div className="hidden max-w-2xl flex-1 items-center justify-center px-4 md:flex">
           {!isHome && (
-            <form onSubmit={handleSearch} className="w-full hidden md:block">
+            <form onSubmit={handleSearch} className="w-full">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input
@@ -170,7 +176,7 @@ const AppLayout = () => {
           )}
         </div>
 
-        <div className="flex items-center gap-4 shrink-0">
+        <div className="flex shrink-0 items-center gap-1 sm:gap-2 md:gap-4">
           <UserMenu />
           <NotificationMenu />
           <LanguageSelector />
@@ -179,7 +185,7 @@ const AppLayout = () => {
 
       <div className="flex-1 flex overflow-hidden">
         <aside className={`
-          absolute inset-y-0 left-0 z-20 w-[240px] transform transition-transform duration-300 ease-in-out md:relative md:translate-x-0
+          fixed inset-y-0 left-0 z-50 w-[240px] transform transition-transform duration-300 ease-in-out md:relative md:z-20 md:translate-x-0
           ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
         `}>
           <Sidebar />

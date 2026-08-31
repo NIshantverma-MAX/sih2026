@@ -35,8 +35,8 @@ export const StandardsSearch: React.FC<StandardsSearchProps> = ({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex-1 flex gap-2" role="search">
-      <div className="flex-1 relative">
+    <form onSubmit={handleSubmit} className="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row" role="search">
+      <div className="relative min-w-0 flex-1">
         <label htmlFor="standards-search" className="sr-only">
           {t('standards.searchLabel')}
         </label>
@@ -60,7 +60,7 @@ export const StandardsSearch: React.FC<StandardsSearchProps> = ({
           </button>
         )}
       </div>
-      <Button type="submit" variant="primary" icon={Search} loading={busy}>
+      <Button type="submit" variant="primary" icon={Search} loading={busy} className="w-full sm:w-auto">
         {t('standards.search')}
       </Button>
     </form>
