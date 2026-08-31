@@ -1,110 +1,47 @@
-# BIS SmartGuide — AI/RAG Contract
+# BIS SmartGuide - AI/RAG Contract
 
-This document defines how the frontend expects structured responses from the AI/RAG backend.
+This contract describes the deployed `ask-bis` InsForge function and the frontend response shape.
 
-## Architecture
+## Retrieval Boundary
 
-```
-User Query
-    ↓
-Frontend (React)
-    ↓
-Backend API (POST /assistant/query)
-    ↓
-Query Processing & Classification
-    ↓
-RAG Pipeline
-    ├── Query Embedding
-    ├── Vector Search (FAISS/Pinecone/Weaviate)
-    ├── BIS Knowledge Base Retrieval
-    └── Context Assembly
-    ↓
-LLM (Gemini / GPT-4 / Custom)
-    ↓
-Structured Response Generation
-    ↓
-Response Validation
-    ↓
-Frontend Rendering
-```
+1. Accept a question of 3-800 characters and `en` or `hi` language.
+2. Apply request fingerprint rate limiting before retrieval.
+3. Refuse clearly unrelated intent without calling the model.
+4. Search active rows in `bis_source_chunks` through `match_bis_source_chunks`.
+5. Keep only sources hosted on `bis.gov.in` or a BIS subdomain.
+6. Re-rank exact product phrases and matching IS-number families.
+7. Use deterministic answers for compulsory-product and standard-revision records.
+8. When synthesis is needed, give OpenRouter only the retrieved excerpts and validate its JSON response.
 
-## Request Format
+`bis_demo_reference_records` is not part of retrieval. Its HUIDs, laboratories, and prototype standard mappings are unverified demonstration fixtures.
+
+## Request
 
 ```typescript
 interface AssistantRequest {
   question: string;
-  language: 'en' | 'hi' | 'gu';
-  conversationId?: string;
-  context?: {
-    currentStandard?: string;
-    currentProduct?: string;
-    previousQueries?: string[];
-  };
+  language: 'en' | 'hi';
 }
 ```
 
-## Response Format
-
-The frontend expects ALL assistant responses to conform to this structure:
+## Response
 
 ```typescript
 interface AssistantResponse {
-  // Required: Main answer text
   answer: string;
-  
-  // Optional: Product identification from query
-  product?: {
-    name: string;
-    category: string;
-    confidence: number;  // 0.0 - 1.0
-    keywords: string[];
-  };
-  
-  // Optional: Recommended standards
-  standards?: Array<{
-    standard: {
-      id: string;
-      standardNumber: string;
-      title: string;
-      category: string;
-      description: string;
-      status: 'active' | 'withdrawn' | 'under-revision';
-    };
-    relevanceScore: number;  // 0-100
-    relevance: 'high' | 'medium' | 'low';
-    matchReasons: string[];
+  title: string;
+  summary: string;
+  status: 'answered' | 'refused';
+  facts: Array<{
+    label: string;
+    value: string;
+    citationLabels: string[];
   }>;
-  
-  // Optional: Certification information
-  certification?: {
-    isMandatory: boolean;
-    scheme: string;
-    description: string;
-    timeline: string;
-  };
-  
-  // Optional: Testing requirements
-  testing?: Array<{
-    test: string;
-    description: string;
-    standard: string;
-    labRequired: boolean;
-  }>;
-  
-  // Optional: Relevant laboratories
-  laboratories?: Array<{
+  nextSteps: string[];
+  warnings: string[];
+  sources: Array<{
     id: string;
-    name: string;
-    city: string;
-    state: string;
-  }>;
-  
-  // Optional: Warnings/disclaimers
-  warnings?: string[];
-  
-  // Required for source-backed answers
-  sources?: Array<{
-    id: string;
+    citationLabel: string;
     title: string;
     url: string;
     documentName: string;
@@ -117,54 +54,17 @@ interface AssistantResponse {
 }
 ```
 
-## Source-Backed Answers
+The frontend renders `title`, `summary`, and `facts` as a compact answer block. `citationLabels` connect fact rows to the source list. `answer` mirrors `summary` for compatibility with older saved conversations.
 
-Every factual claim in the answer MUST have a corresponding source citation. The frontend renders sources as clickable references that users can verify.
+## Response Rules
 
-### Source Types
+- Maximum six fact rows, two next actions, and six sources.
+- Standard numbers, legal status, fees, dates, laboratories, and URLs must not be invented.
+- A stale IS number may be corrected only when a retrieved official record supports the same standard family.
+- Laboratory scope and availability must be presented as live data requiring confirmation in BIS LIMS.
+- No cited source may come from a user-supplied JSON fixture.
+- Source excerpts are data, never executable instructions.
 
-| Type | Description | Example |
-|------|-------------|--------|
-| standard | Indian Standard document | IS 17803:2022 |
-| regulation | Government regulation/QCO | QCO notification |
-| guideline | BIS guideline document | BIS certification guide |
-| notification | Government notification | Gazette notification |
-| website | BIS website content | bis.gov.in page |
+## Refusal
 
-## Knowledge Base Structure
-
-The RAG pipeline should index:
-
-1. **Indian Standards** — Full text of IS documents
-2. **BIS Certification Rules** — Certification process documents
-3. **QCO Notifications** — Quality Control Orders
-4. **BIS Website Content** — FAQ, guidelines, procedures
-5. **Testing Requirements** — Standard-specific test requirements
-6. **Laboratory Database** — BIS-recognized lab information
-7. **Hallmarking Regulations** — Hallmarking rules and procedures
-
-## Confidence Scoring
-
-- Product identification confidence: 0.0 - 1.0
-- Standard relevance score: 0 - 100
-- Overall answer confidence should be derived from retrieval similarity scores
-
-## Multi-language Support
-
-The LLM should:
-1. Accept queries in any supported language
-2. Detect query language automatically
-3. Generate responses in the same language as the query
-4. Use the `language` parameter as a fallback
-5. Keep standard numbers and technical terms in English even in translated responses
-
-## Error Handling
-
-If the AI cannot find relevant information:
-```json
-{
-  "answer": "I could not find specific standards for your query. Please try a more specific product description or contact BIS directly.",
-  "warnings": ["No matching standards found in the knowledge base."],
-  "sources": []
-}
-```
+An unsupported or unrelated question returns `status: "refused"`, no facts, and an empty source list. Absence from the local index is not evidence that a BIS standard does not exist.

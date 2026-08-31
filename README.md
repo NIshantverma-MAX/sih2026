@@ -106,29 +106,34 @@ sequenceDiagram
   UI-->>User: Cards, filters, source references
 ```
 
-### Planned AI Assistant Flow
+### Source-Grounded AI Assistant Flow
 
 ```mermaid
 sequenceDiagram
   actor User
   participant UI as Ask Assistant Page
-  participant API as Backend API
-  participant RAG as RAG Pipeline
-  participant KB as BIS Knowledge Base
-  participant LLM as LLM Provider
+  participant API as InsForge ask-bis Function
+  participant DB as Official BIS Source Index
+  participant LLM as OpenRouter (supported excerpts only)
 
   User->>UI: Ask BIS question
-  UI->>API: POST /assistant/query
-  API->>RAG: Classify query and retrieve context
-  RAG->>KB: Search standards, QCOs, guidelines, labs
-  KB-->>RAG: Ranked source chunks
-  RAG->>LLM: Generate answer using retrieved context
-  LLM-->>RAG: Draft structured answer
-  RAG->>RAG: Validate schema and source citations
-  RAG-->>API: AssistantResponse JSON
+  UI->>API: Invoke ask-bis(question, language)
+  API->>API: Rate-limit and reject unrelated intent
+  API->>DB: Search active official source chunks
+  DB-->>API: Ranked excerpts + metadata + URLs
+  API->>API: Re-rank product phrases and IS-number families
+  alt Deterministic standard record
+    API->>API: Build compact structured answer
+  else Excerpt synthesis needed
+    API->>LLM: Generate JSON using only retrieved excerpts
+    LLM-->>API: Structured draft with citation labels
+    API->>API: Validate and cap response fields
+  end
   API-->>UI: Source-backed answer
-  UI-->>User: Answer, warnings, standards, sources
+  UI-->>User: Summary, fact rows, next action, source links
 ```
+
+The indexed corpus currently includes the two supplied official BIS compulsory-marking annexures, official hallmarking/HUID guidance, live BIS LIMS records for IS 1417, and independently checked standard-revision records. Every indexed document and chunk carries provenance metadata. User-supplied prototype HUIDs, laboratories, and stale standard lists are isolated in `bis_demo_reference_records` and are never queried by the assistant.
 
 ### Planned Document Analysis Flow
 
@@ -345,7 +350,7 @@ Important planned endpoints:
 | `POST /auth/register` | Register manufacturer, consumer, student, or administrator. |
 | `GET /standards` | Search and filter standards. |
 | `GET /standards/:id` | Read one standard with sources and requirements. |
-| `POST /assistant/query` | Ask a source-backed BIS guidance question. |
+| InsForge function `ask-bis` | Ask a source-backed BIS guidance question. |
 | `GET /laboratories` | Search BIS-recognized testing labs. |
 | `POST /hallmarking/verify` | Verify HUID or hallmarking details. |
 | `POST /documents` | Upload a document for extraction and analysis. |
@@ -357,11 +362,12 @@ See `docs/API_CONTRACT.md` and `docs/AI_CONTRACT.md` for request and response st
 ## AI/RAG Design Principles
 
 - Every factual claim should be backed by a source citation.
-- The assistant should return structured JSON, not loose text.
+- The assistant returns a compact title, summary, fact rows, next actions, warnings, and clickable sources instead of loose text.
 - If evidence is missing or ambiguous, the system should say so instead of guessing.
 - LLM API keys must never be exposed in the frontend.
 - The frontend should render warnings and source links clearly.
-- Official BIS sources, QCOs, standards, guidelines, and lab data should be treated as the highest-priority knowledge base.
+- Only indexed URLs on `bis.gov.in` and its subdomains are eligible as answer evidence.
+- Prototype/demo HUID, laboratory, and business records remain visibly labeled and outside the official retrieval path.
 
 ```mermaid
 flowchart TD

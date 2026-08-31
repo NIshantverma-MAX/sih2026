@@ -382,6 +382,7 @@ function AssistantChat() {
               <Button
                 onClick={() => void handleSend()}
                 disabled={isChatBusy || !authHydrated || !query.trim()}
+                aria-label={language === 'hi' ? 'भेजें' : 'Send'}
                 className="flex-shrink-0 bg-blue-900 text-white hover:bg-blue-800"
                 icon={Send}
               >

@@ -273,6 +273,11 @@ export interface AssistantConversation {
 
 export interface AssistantResponse {
   answer: string;
+  title?: string;
+  summary?: string;
+  status?: 'answered' | 'refused';
+  facts?: AssistantFact[];
+  nextSteps?: string[];
   product?: ProductIdentification;
   standards?: StandardRecommendation[];
   certification?: CertificationSummary;
@@ -280,6 +285,12 @@ export interface AssistantResponse {
   laboratories?: Laboratory[];
   warnings?: string[];
   sources?: SourceCitation[];
+}
+
+export interface AssistantFact {
+  label: string;
+  value: string;
+  citationLabels: string[];
 }
 
 export interface CertificationSummary {
