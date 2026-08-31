@@ -1,8 +1,27 @@
-import type { AssistantMessage, AssistantResponse, Language, StandardRecommendation } from '../types';
-import { standards } from '../data/standards';
-import { sources } from '../data/sources';
+import type {
+  AssistantConversation,
+  AssistantMessage,
+  AssistantResponse,
+  Language,
+} from '../types';
+import { insforge } from '../lib/insforge';
 
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+interface ConversationRow {
+  id: string;
+  title: string;
+  language: Language;
+  created_at: string;
+  updated_at: string;
+}
+
+interface MessageRow {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  language: Language;
+  response: AssistantResponse | null;
+  created_at: string;
+}
 
 export interface AssistantContext {
   /**
@@ -13,132 +32,136 @@ export interface AssistantContext {
   standardId?: string;
 }
 
-export async function askQuestion(
-  question: string,
-  language: Language,
-  context?: AssistantContext
-): Promise<AssistantResponse> {
-  await delay(2000);
-
-  const q = question.toLowerCase();
-  let answer = '';
-  let matchedStandards: StandardRecommendation[] = [];
-  
-  if (q.includes('water') || q.includes('bottle') || q.includes('पानी') || q.includes('बोतल')) {
-    const relevantStds = standards.filter(s => 
-      s.title.toLowerCase().includes('water') || 
-      s.title.toLowerCase().includes('steel') ||
-      s.category.toLowerCase().includes('household')
-    ).slice(0, 3);
-    
-    matchedStandards = relevantStds.map((s, i) => ({
-      standard: s,
-      relevanceScore: 95 - (i * 10),
-      relevance: (i === 0 ? 'high' : i === 1 ? 'high' : 'medium') as 'high' | 'medium' | 'low',
-      matchReasons: ['Product material matches', 'Intended use matches', 'Food contact safety applicable'],
-    }));
-
-    answer = language === 'hi' 
-      ? 'स्टेनलेस स्टील की पानी की बोतल के लिए निम्नलिखित BIS मानक प्रासंगिक हो सकते हैं:\n\n1. IS 17803:2022 – Stainless Steel Vacuum Insulated Flask\n2. IS 13428:2005 – Stainless Steel Utensils\n\nये मानक खाद्य संपर्क सामग्री, विशिष्ट स्टील ग्रेड और सुरक्षा आवश्यकताओं को कवर करते हैं।'
-      : 'For stainless steel water bottles, the following BIS standards may be relevant:\n\n1. IS 17803:2022 – Stainless Steel Vacuum Insulated Flask\n2. IS 13428:2005 – Stainless Steel Utensils\n\nThese standards cover food contact materials, specific steel grades, and safety requirements.';
-  } else if (q.includes('led') || q.includes('bulb') || q.includes('एलईडी')) {
-    const relevantStds = standards.filter(s => 
-      s.title.toLowerCase().includes('led') || 
-      s.title.toLowerCase().includes('lamp')
-    ).slice(0, 2);
-    
-    matchedStandards = relevantStds.map((s, i) => ({
-      standard: s,
-      relevanceScore: 95 - (i * 10),
-      relevance: 'high' as const,
-      matchReasons: ['Product type matches', 'Electrical safety applicable'],
-    }));
-
-    answer = language === 'hi'
-      ? 'LED बल्बों के लिए BIS प्रमाणन अनिवार्य है। संबंधित मानक IS 16102 है।'
-      : 'BIS certification for LED bulbs is mandatory. The applicable standard is IS 16102 (Self-ballasted LED Lamps).';
-  } else if (q.includes('gold') || q.includes('hallmark') || q.includes('सोन') || q.includes('हॉलमार्क')) {
-    answer = language === 'hi'
-      ? 'सोने के आभूषणों पर हॉलमार्किंग अनिवार्य है। इसमें HUID (6 अंकों का कोड) शामिल होता है जिसे BIS Care ऐप या इस पोर्टल पर सत्यापित किया जा सकता है।'
-      : 'Gold hallmarking is mandatory in India. It includes a 6-digit HUID code that can be verified using the BIS Care app or this portal.';
-  } else if (q.includes('certification') || q.includes('प्रमाण')) {
-    answer = language === 'hi'
-      ? 'BIS प्रमाणन प्रक्रिया में सामान्यतः 7 चरण होते हैं: मानक की पहचान, आवश्यकता जाँच, तैयारी, परीक्षण, आवेदन, मूल्यांकन और प्रमाणन।'
-      : 'The BIS certification process typically involves 7 steps: Identify Standard, Check Requirement, Prepare, Testing, Application, Assessment, and Certification.';
-  } else {
-    answer = language === 'hi'
-      ? 'BIS मानकों और प्रमाणन के बारे में आपके प्रश्न का उत्तर: कृपया अपने उत्पाद का विवरण दें ताकि हम आपको सही मानक और मार्गदर्शन प्रदान कर सकें।'
-      : 'Thank you for your question about BIS standards and certification. Please describe your product in detail so we can provide you with the right standards and guidance.';
+function requireInsForge() {
+  if (!insforge) {
+    throw new Error('BIS assistant backend is not configured.');
   }
+  return insforge;
+}
 
-  // The standard carried in from the Standards workflow. Its number and title are read
-  // from the dataset rather than restated in prose, so the opening line cannot drift from
-  // the record the details page showed.
-  const contextStandard = context?.standardId
-    ? standards.find((s) => s.id === context.standardId)
-    : undefined;
-
-  if (contextStandard) {
-    answer =
-      (language === 'hi'
-        ? `संदर्भ: ${contextStandard.standardNumber} — ${contextStandard.title}`
-        : `Context: ${contextStandard.standardNumber} — ${contextStandard.title}`) +
-      `\n\n${answer}`;
-
-    if (!matchedStandards.some((m) => m.standard.id === contextStandard.id)) {
-      matchedStandards = [
-        {
-          standard: contextStandard,
-          relevanceScore: 100,
-          relevance: 'high',
-          matchType: 'primary',
-          matchReasons: [
-            language === 'hi'
-              ? 'यह वही मानक है जिसे आपने खोला था (यह कोई खोज रैंकिंग नहीं है)।'
-              : 'This is the standard you opened — not a search ranking.'
-          ]
-        },
-        ...matchedStandards
-      ];
-    }
-  }
-
-  /**
-   * Citations for a question asked about a specific standard: only that standard's own
-   * documents, and nothing at all when it has none recorded.
-   *
-   * The generic fallback below serves the first few documents in the catalogue, which is
-   * acceptable for an open question but not for one anchored to a standard — several
-   * standards in this dataset carry no `sourceIds`, and falling back there attributed
-   * another standard's Quality Control Order and Product Manual to this answer.
-   */
-  const contextSources = contextStandard
-    ? sources.filter((s) => contextStandard.sourceIds.includes(s.id))
-    : [];
-
+function mapConversation(row: ConversationRow): AssistantConversation {
   return {
-    answer,
-    product: q.includes('water') || q.includes('bottle') ? {
-      name: 'Stainless Steel Water Bottle',
-      category: 'Household / Food Contact Articles',
-      confidence: 0.94,
-      keywords: ['stainless steel', 'water bottle', 'food contact'],
-    } : undefined,
-    standards: matchedStandards.length > 0 ? matchedStandards : undefined,
-    certification: {
-      isMandatory: false,
-      scheme: 'ISI Certification Marks Scheme',
-      description: 'Product certification under BIS Act 2016',
-      timeline: '4-6 months',
-    },
-    warnings: ['This is AI-generated guidance. Please verify with official BIS sources for the most current information.'],
-    sources: contextStandard
-      ? (contextSources.length > 0 ? contextSources : undefined)
-      : sources.slice(0, 3),
+    id: row.id,
+    title: row.title,
+    language: row.language,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
   };
 }
 
-export async function getConversation(_id: string): Promise<AssistantMessage[]> {
-  await delay(500);
-  return [];
+export async function askQuestion(question: string, language: Language, context?: AssistantContext): Promise<AssistantResponse> {
+  const client = requireInsForge();
+
+  const { data, error } = await client.functions.invoke('ask-bis', {
+    body: { question, language, standardId: context?.standardId },
+  });
+
+  if (error) {
+    throw error;
+  }
+
+  if (!data || typeof data.answer !== 'string') {
+    throw new Error('BIS assistant returned an invalid response.');
+  }
+
+  return data as AssistantResponse;
+}
+
+export async function listConversations(): Promise<AssistantConversation[]> {
+  const client = requireInsForge();
+  const { data, error } = await client.database
+    .from('assistant_conversations')
+    .select('id, title, language, created_at, updated_at')
+    .order('updated_at', { ascending: false })
+    .order('id', { ascending: false })
+    .limit(50);
+
+  if (error) {
+    throw error;
+  }
+
+  return ((data ?? []) as ConversationRow[]).map(mapConversation);
+}
+
+export async function createConversation(
+  title: string,
+  language: Language,
+): Promise<AssistantConversation> {
+  const client = requireInsForge();
+  const { data, error } = await client.database
+    .from('assistant_conversations')
+    .insert([{ title, language }])
+    .select('id, title, language, created_at, updated_at');
+
+  if (error) {
+    throw error;
+  }
+
+  const row = (data as ConversationRow[] | null)?.[0];
+  if (!row) {
+    throw new Error('InsForge did not return the new conversation.');
+  }
+
+  return mapConversation(row);
+}
+
+export async function getConversation(id: string): Promise<AssistantMessage[]> {
+  const client = requireInsForge();
+  const { data, error } = await client.database
+    .from('assistant_messages')
+    .select('id, role, content, language, response, created_at')
+    .eq('conversation_id', id)
+    .order('created_at', { ascending: false })
+    .order('id', { ascending: false })
+    .limit(200);
+
+  if (error) {
+    throw error;
+  }
+
+  return ((data ?? []) as MessageRow[])
+    .reverse()
+    .map((row) => ({
+      id: row.id,
+      role: row.role,
+      content: row.content,
+      timestamp: row.created_at,
+      language: row.language,
+      response: row.response ?? undefined,
+    }));
+}
+
+export async function saveMessage(
+  conversationId: string,
+  message: AssistantMessage,
+): Promise<AssistantMessage> {
+  const client = requireInsForge();
+  const { data, error } = await client.database
+    .from('assistant_messages')
+    .insert([{
+      conversation_id: conversationId,
+      role: message.role,
+      content: message.content,
+      language: message.language,
+      response: message.response ?? null,
+    }])
+    .select('id, role, content, language, response, created_at');
+
+  if (error) {
+    throw error;
+  }
+
+  const row = (data as MessageRow[] | null)?.[0];
+  if (!row) {
+    throw new Error('InsForge did not return the saved message.');
+  }
+
+  return {
+    id: row.id,
+    role: row.role,
+    content: row.content,
+    timestamp: row.created_at,
+    language: row.language,
+    response: row.response ?? undefined,
+  };
 }

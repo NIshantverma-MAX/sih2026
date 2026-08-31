@@ -185,7 +185,7 @@ const AppLayout = () => {
           <Sidebar />
         </aside>
 
-        <main className="flex-1 overflow-y-auto">
+        <main className="min-w-0 flex-1 overflow-y-auto">
           {!isHome && (
             <div className="p-4 bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-800 md:hidden shrink-0">
               <form onSubmit={handleSearch}>

@@ -397,8 +397,21 @@ export interface AssistantMessage {
   response?: AssistantResponse;
 }
 
+export interface AssistantConversation {
+  id: string;
+  title: string;
+  language: Language;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface AssistantResponse {
   answer: string;
+  title?: string;
+  summary?: string;
+  status?: 'answered' | 'refused';
+  facts?: AssistantFact[];
+  nextSteps?: string[];
   product?: ProductIdentification;
   standards?: StandardRecommendation[];
   certification?: CertificationSummary;
@@ -406,6 +419,12 @@ export interface AssistantResponse {
   laboratories?: Laboratory[];
   warnings?: string[];
   sources?: SourceCitation[];
+}
+
+export interface AssistantFact {
+  label: string;
+  value: string;
+  citationLabels: string[];
 }
 
 export interface CertificationSummary {
@@ -425,6 +444,7 @@ export interface TestingRequirement {
 // Source/Citation types
 export interface SourceCitation {
   id: string;
+  citationLabel?: string;
   title: string;
   url: string;
   documentName: string;

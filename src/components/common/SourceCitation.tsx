@@ -20,7 +20,10 @@ export const SourceCitation: React.FC<SourceCitationProps> = ({ source, showSnip
           <FileText className="w-5 h-5" />
         </div>
         <div className="flex-1 min-w-0">
-          <h4 className="text-sm font-semibold text-gray-900">{source.title}</h4>
+          <h4 className="text-sm font-semibold text-gray-900">
+            {source.citationLabel && <span className="mr-1 text-blue-800">[{source.citationLabel}]</span>}
+            {source.title}
+          </h4>
           <p className="text-xs text-gray-500 mt-1 break-words">{source.documentName}</p>
           {(source.section || source.page || source.clause) && (
             <div className="flex flex-wrap gap-2 mt-2 text-xs text-gray-600">

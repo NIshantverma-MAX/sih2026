@@ -1,179 +1,406 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { useStore } from '../lib/store';
-import { useTranslation } from '../hooks/useTranslation';
-import { askQuestion } from '../services/assistantService';
-import { getStandard } from '../services/standardsService';
-import type { AssistantMessage as AssistantMessageType, Standard } from '../types';
+import { useEffect, useRef, useState } from 'react';
+import { Globe, History, Loader2, MessageSquare, Plus, Send } from 'lucide-react';
+import toast from 'react-hot-toast';
+import { AssistantMessage } from '../components/common/AssistantMessage';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { PageHeader } from '../components/ui/PageHeader';
-import { AssistantMessage } from '../components/common/AssistantMessage';
-import { Send, Globe, FileText } from 'lucide-react';
+import { useStore } from '../lib/store';
+import { useTranslation } from '../hooks/useTranslation';
+import {
+  askQuestion,
+  createConversation,
+  getConversation,
+  listConversations,
+  saveMessage,
+} from '../services/assistantService';
+import type {
+  AssistantConversation,
+  AssistantMessage as AssistantMessageType,
+  Language,
+} from '../types';
 
-export default function AskAssistant() {
-  const { language } = useStore();
-  const { t } = useTranslation();
-  const [searchParams] = useSearchParams();
-  // Context handed over by the Standards workflow. Read once — the conversation then owns
-  // itself, so typing here never rewrites the Standards page's own search.
-  const standardId = searchParams.get('standardId') ?? '';
-  const seedQuery = searchParams.get('q') ?? '';
+const welcomeMessageId = 'welcome';
 
-  const [query, setQuery] = useState('');
-  const [contextStandard, setContextStandard] = useState<Standard | null>(null);
-  const [messages, setMessages] = useState<AssistantMessageType[]>([{
-    id: '1',
+function createWelcomeMessage(language: Language): AssistantMessageType {
+  return {
+    id: welcomeMessageId,
     role: 'assistant',
-    content: t('assistant.welcome') || 'Welcome to BIS SmartGuide! I can help you find relevant Indian Standards, understand certification processes, and more. Ask me anything related to BIS.',
+    content: language === 'hi'
+      ? 'बीआईएस स्मार्टगाइड में आपका स्वागत है! मैं आपकी बीआईएस संबंधित किसी भी समस्या में मदद कर सकता हूं।'
+      : 'Welcome to BIS SmartGuide! I can help you find relevant Indian Standards, understand certification processes, and more. Ask me anything related to BIS.',
     timestamp: new Date().toISOString(),
-    language
-  }]);
+    language,
+  };
+}
+
+function createConversationTitle(question: string): string {
+  const normalized = question.replace(/\s+/g, ' ').trim();
+  return normalized.length > 72 ? `${normalized.slice(0, 69)}...` : normalized;
+}
+
+function formatConversationDate(timestamp: string): string {
+  const date = new Date(timestamp);
+  const today = new Date();
+
+  if (date.toDateString() === today.toDateString()) {
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+
+  return date.toLocaleDateString([], { day: '2-digit', month: 'short' });
+}
+
+function AssistantChat() {
+  const { language, user, isAuthenticated, authHydrated } = useStore();
+  const { t } = useTranslation();
+  const [query, setQuery] = useState('');
+  const [messages, setMessages] = useState<AssistantMessageType[]>([]);
+  const [conversations, setConversations] = useState<AssistantConversation[]>([]);
+  const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isHistoryLoading, setIsHistoryLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
   useEffect(() => {
-    scrollToBottom();
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isLoading]);
 
-  const send = useCallback(async (text: string) => {
-    const trimmed = text.trim();
-    if (!trimmed) return;
+  useEffect(() => {
+    if (!authHydrated || !isAuthenticated || !user) {
+      return;
+    }
 
-    const userMsg: AssistantMessageType = {
-      id: Date.now().toString(),
+    let cancelled = false;
+
+    async function restoreHistory() {
+      setIsHistoryLoading(true);
+
+      try {
+        const savedConversations = await listConversations();
+        if (cancelled) return;
+
+        setConversations(savedConversations);
+        const latest = savedConversations[0];
+
+        if (!latest) {
+          setMessages([]);
+          setSelectedConversationId(null);
+          return;
+        }
+
+        const savedMessages = await getConversation(latest.id);
+        if (cancelled) return;
+
+        setSelectedConversationId(latest.id);
+        setMessages(savedMessages);
+      } catch (error) {
+        console.error(error);
+        if (!cancelled) {
+          toast.error('Your saved chats could not be loaded.');
+        }
+      } finally {
+        if (!cancelled) {
+          setIsHistoryLoading(false);
+        }
+      }
+    }
+
+    void restoreHistory();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [authHydrated, isAuthenticated, user]);
+
+  const startNewChat = () => {
+    if (isLoading) return;
+    setSelectedConversationId(null);
+    setMessages([]);
+    setQuery('');
+  };
+
+  const openConversation = async (conversationId: string) => {
+    if (isLoading || conversationId === selectedConversationId) return;
+
+    setSelectedConversationId(conversationId);
+    setIsHistoryLoading(true);
+
+    try {
+      const savedMessages = await getConversation(conversationId);
+      setMessages(savedMessages);
+    } catch (error) {
+      console.error(error);
+      toast.error('This chat could not be loaded.');
+    } finally {
+      setIsHistoryLoading(false);
+    }
+  };
+
+  const moveConversationToTop = (conversationId: string, timestamp: string) => {
+    setConversations((current) => {
+      const conversation = current.find((item) => item.id === conversationId);
+      if (!conversation) return current;
+
+      return [
+        { ...conversation, updatedAt: timestamp },
+        ...current.filter((item) => item.id !== conversationId),
+      ];
+    });
+  };
+
+  const replaceMessage = (temporaryId: string, savedMessage: AssistantMessageType) => {
+    setMessages((current) => current.map((message) => (
+      message.id === temporaryId ? savedMessage : message
+    )));
+  };
+
+  const handleSend = async () => {
+    const question = query.trim();
+    if (!question || isLoading || !authHydrated) return;
+
+    const userMessage: AssistantMessageType = {
+      id: crypto.randomUUID(),
       role: 'user',
-      content: trimmed,
+      content: question,
       timestamp: new Date().toISOString(),
-      language
+      language,
     };
 
-    setMessages(prev => [...prev, userMsg]);
+    setMessages((current) => [...current, userMessage]);
     setQuery('');
     setIsLoading(true);
 
+    let conversationId = selectedConversationId;
+    let historyWritable = isAuthenticated && Boolean(user);
+
+    if (historyWritable) {
+      try {
+        if (!conversationId) {
+          const conversation = await createConversation(
+            createConversationTitle(question),
+            language,
+          );
+          conversationId = conversation.id;
+          setSelectedConversationId(conversation.id);
+          setConversations((current) => [
+            conversation,
+            ...current.filter((item) => item.id !== conversation.id),
+          ]);
+        }
+
+        const savedUserMessage = await saveMessage(conversationId, userMessage);
+        replaceMessage(userMessage.id, savedUserMessage);
+        moveConversationToTop(conversationId, savedUserMessage.timestamp);
+      } catch (error) {
+        console.error(error);
+        historyWritable = false;
+        toast.error('This reply will not be saved to chat history.');
+      }
+    }
+
+    let assistantMessage: AssistantMessageType;
+
     try {
-      const response = await askQuestion(
-        trimmed,
-        language,
-        standardId ? { standardId } : undefined
-      );
-      const assistantMsg: AssistantMessageType = {
-        id: (Date.now() + 1).toString(),
+      const response = await askQuestion(question, language);
+      assistantMessage = {
+        id: crypto.randomUUID(),
         role: 'assistant',
         content: response.answer,
         timestamp: new Date().toISOString(),
         language,
-        response: response
+        response,
       };
-      setMessages(prev => [...prev, assistantMsg]);
-    } catch {
-      // Surfaced in the thread rather than only in the console, so a failure is not
-      // indistinguishable from the assistant having nothing to say.
-      setMessages(prev => [...prev, {
-        id: (Date.now() + 1).toString(),
+    } catch (error) {
+      console.error(error);
+      assistantMessage = {
+        id: crypto.randomUUID(),
         role: 'assistant',
-        content: t('assistant.errorMessage'),
+        content: language === 'hi'
+          ? 'BIS SmartGuide अभी आधिकारिक BIS स्रोतों से उत्तर नहीं ला पा रहा है। कृपया कुछ देर बाद फिर कोशिश करें।'
+          : 'BIS SmartGuide could not retrieve an official-source answer right now. Please try again in a moment.',
         timestamp: new Date().toISOString(),
-        language
-      }]);
-    } finally {
-      setIsLoading(false);
+        language,
+        response: {
+          answer: '',
+          warnings: ['The assistant failed closed instead of returning an unsourced answer.'],
+        },
+      };
     }
-  }, [language, standardId, t]);
 
-  const handleSend = () => {
-    void send(query);
+    setMessages((current) => [...current, assistantMessage]);
+
+    if (historyWritable && conversationId) {
+      try {
+        const savedAssistantMessage = await saveMessage(conversationId, assistantMessage);
+        replaceMessage(assistantMessage.id, savedAssistantMessage);
+        moveConversationToTop(conversationId, savedAssistantMessage.timestamp);
+      } catch (error) {
+        console.error(error);
+        toast.error('The latest reply could not be saved.');
+      }
+    }
+
+    setIsLoading(false);
   };
 
-  // The handover from a standard: the question is asked for the user so the journey
-  // continues instead of dropping them at an empty box.
-  const seededRef = useRef(false);
-  useEffect(() => {
-    if (seededRef.current) return;
-    if (!standardId && !seedQuery.trim()) return;
-    seededRef.current = true;
-
-    void (async () => {
-      let question = seedQuery.trim();
-      if (standardId) {
-        const standard = await getStandard(standardId);
-        if (standard) {
-          setContextStandard(standard);
-          if (!question) {
-            question = `${t('assistant.standardQuestion')} ${standard.standardNumber}?`;
-          }
-        }
-      }
-      if (question) await send(question);
-    })();
-    // `send` and `t` are stable enough here; re-running would re-ask the same question.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [standardId, seedQuery]);
+  const isChatBusy = isLoading || isHistoryLoading;
 
   return (
-    <div className="flex flex-col h-[calc(100vh-6rem)]">
-      <div className="flex justify-between items-center mb-6">
-        <PageHeader 
-          title={t('assistant.title') || 'Ask BIS SmartGuide'} 
-          subtitle={t('assistant.subtitle') || 'Your AI assistant for all BIS related queries.'} 
-        />
-        <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-slate-300 bg-white dark:bg-slate-800 px-3 py-1.5 rounded-full border dark:border-slate-700 shadow-sm h-10">
-          <Globe className="w-4 h-4" />
-          <span>{language === 'hi' ? 'हिंदी' : 'English'}</span>
-        </div>
-      </div>
+    <div className="flex h-[calc(100vh-6rem)] min-h-[34rem] flex-col">
+      <PageHeader
+        title="Ask BIS SmartGuide"
+        subtitle="Your AI assistant for BIS-related queries."
+        actions={(
+          <>
+            <div className="flex h-10 items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-600 shadow-sm">
+              <Globe className="h-4 w-4" />
+              <span>{t('assistant.language') || (language === 'hi' ? 'हिंदी' : 'English')}</span>
+            </div>
+            <Button
+              variant="outline"
+              icon={Plus}
+              onClick={startNewChat}
+              disabled={isChatBusy}
+            >
+              {t('assistant.newChat') || (language === 'hi' ? 'नई चैट' : 'New chat')}
+            </Button>
+          </>
+        )}
+      />
 
-      {/* What the conversation is anchored to, so the handover from Standards is visible. */}
-      {contextStandard && (
-        <div className="mb-4 flex items-center gap-2 text-sm text-blue-900 dark:text-blue-200 bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-800 rounded-lg px-3 py-2">
-          <FileText className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
-          <span className="font-medium">{t('assistant.contextLabel')}</span>
-          <span className="truncate">
-            {contextStandard.standardNumber} — {contextStandard.title}
-          </span>
-        </div>
-      )}
+      <div className="flex min-h-0 flex-1 overflow-hidden rounded-lg border border-gray-200 bg-gray-50 shadow-sm">
+        <aside className="hidden w-64 flex-shrink-0 flex-col border-r border-gray-200 bg-white lg:flex">
+          <div className="flex h-14 items-center gap-2 border-b border-gray-200 px-4">
+            <History className="h-4 w-4 text-blue-900" />
+            <h2 className="text-sm font-semibold text-gray-900">Chat history</h2>
+          </div>
 
-      <div className="flex-1 bg-gray-50 dark:bg-slate-900 rounded-xl border dark:border-slate-700 overflow-hidden flex flex-col shadow-sm">
-        <div className="flex-1 overflow-y-auto p-4 space-y-6">
-          {messages.map((msg) => (
-            <AssistantMessage key={msg.id} message={msg} />
-          ))}
-          {isLoading && (
-            <div className="flex justify-start">
-              <div className="bg-white dark:bg-slate-800 border dark:border-slate-700 rounded-2xl rounded-tl-sm p-4 shadow-sm max-w-[80%]">
-                <div className="flex space-x-2 items-center h-6">
-                  <div className="w-2 h-2 bg-gray-400 dark:bg-slate-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                  <div className="w-2 h-2 bg-gray-400 dark:bg-slate-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                  <div className="w-2 h-2 bg-gray-400 dark:bg-slate-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-                </div>
+          <div className="min-h-0 flex-1 overflow-y-auto p-2">
+            {isHistoryLoading && conversations.length === 0 ? (
+              <div className="flex items-center justify-center py-8 text-gray-500">
+                <Loader2 className="h-5 w-5 animate-spin" aria-label="Loading chat history" />
+              </div>
+            ) : !isAuthenticated ? (
+              <p className="px-2 py-4 text-sm text-gray-500">Sign in to access saved chats.</p>
+            ) : conversations.length === 0 ? (
+              <p className="px-2 py-4 text-sm text-gray-500">No saved chats yet.</p>
+            ) : (
+              <div className="space-y-1">
+                {conversations.map((conversation) => (
+                  <button
+                    key={conversation.id}
+                    type="button"
+                    onClick={() => void openConversation(conversation.id)}
+                    disabled={isChatBusy}
+                    className={`w-full rounded-md px-3 py-2.5 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${
+                      selectedConversationId === conversation.id
+                        ? 'bg-blue-50 text-blue-950'
+                        : 'text-gray-700 hover:bg-gray-100'
+                    }`}
+                  >
+                    <span className="block truncate text-sm font-medium">{conversation.title}</span>
+                    <time className="mt-1 block text-xs text-gray-500" dateTime={conversation.updatedAt}>
+                      {formatConversationDate(conversation.updatedAt)}
+                    </time>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </aside>
+
+        <div className="flex min-w-0 flex-1 flex-col">
+          {isAuthenticated && conversations.length > 0 && (
+            <div className="border-b border-gray-200 bg-white p-3 lg:hidden">
+              <label htmlFor="mobile-chat-history" className="sr-only">Chat history</label>
+              <div className="flex items-center gap-2">
+                <MessageSquare className="h-4 w-4 flex-shrink-0 text-blue-900" />
+                <select
+                  id="mobile-chat-history"
+                  value={selectedConversationId ?? ''}
+                  onChange={(event) => {
+                    if (event.target.value) {
+                      void openConversation(event.target.value);
+                    } else {
+                      startNewChat();
+                    }
+                  }}
+                  disabled={isChatBusy}
+                  className="h-9 min-w-0 flex-1 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700 focus:border-blue-900 focus:ring-blue-900"
+                >
+                  <option value="">New chat</option>
+                  {conversations.map((conversation) => (
+                    <option key={conversation.id} value={conversation.id}>
+                      {conversation.title}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
           )}
-          <div ref={messagesEndRef} />
-        </div>
 
-        <div className="p-4 bg-white dark:bg-slate-800 border-t dark:border-slate-700">
-          <div className="flex space-x-2">
-            <Input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-              placeholder={t('assistant.placeholder') || 'Type your question here...'}
-              className="flex-1"
-            />
-            <Button onClick={handleSend} disabled={isLoading || !query.trim()} className="bg-blue-900 hover:bg-blue-800 text-white flex-shrink-0">
-              <Send className="w-4 h-4 mr-2" />
-              {t('assistant.send') || 'Send'}
-            </Button>
+          <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-6">
+            {isHistoryLoading && selectedConversationId ? (
+              <div className="flex h-full items-center justify-center text-gray-500">
+                <Loader2 className="h-6 w-6 animate-spin" aria-label="Loading conversation" />
+              </div>
+            ) : (
+              <>
+                <AssistantMessage message={createWelcomeMessage(language)} />
+                {messages.map((message) => (
+                  <AssistantMessage key={message.id} message={message} />
+                ))}
+                {isLoading && (
+                  <div className="flex justify-start">
+                    <div className="max-w-[80%] rounded-2xl rounded-tl-sm border bg-white p-4 shadow-sm">
+                      <div className="flex h-6 items-center space-x-2" aria-label="BIS SmartGuide is responding">
+                        <div className="h-2 w-2 animate-bounce rounded-full bg-gray-400" />
+                        <div className="h-2 w-2 animate-bounce rounded-full bg-gray-400 [animation-delay:150ms]" />
+                        <div className="h-2 w-2 animate-bounce rounded-full bg-gray-400 [animation-delay:300ms]" />
+                      </div>
+                    </div>
+                  </div>
+                )}
+                <div ref={messagesEndRef} />
+              </>
+            )}
+          </div>
+
+          <div className="border-t border-gray-200 bg-white p-3 sm:p-4">
+            <div className="flex gap-2">
+              <Input
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' && !event.shiftKey) {
+                    event.preventDefault();
+                    void handleSend();
+                  }
+                }}
+                disabled={isChatBusy || !authHydrated}
+                placeholder={t('assistant.placeholder') || (language === 'hi' ? 'अपना सवाल यहाँ लिखें...' : 'Type your question here...')}
+                className="min-w-0 flex-1"
+              />
+              <Button
+                onClick={() => void handleSend()}
+                disabled={isChatBusy || !authHydrated || !query.trim()}
+                aria-label={t('assistant.send') || (language === 'hi' ? 'भेजें' : 'Send')}
+                className="flex-shrink-0 bg-blue-900 text-white hover:bg-blue-800"
+                icon={Send}
+              >
+                <span className="hidden sm:inline">{t('assistant.send') || (language === 'hi' ? 'भेजें' : 'Send')}</span>
+              </Button>
+            </div>
           </div>
         </div>
       </div>
     </div>
   );
+}
+
+export default function AskAssistant() {
+  const { authHydrated, user } = useStore();
+  const sessionKey = authHydrated ? (user?.id ?? 'guest') : 'loading';
+
+  return <AssistantChat key={sessionKey} />;
 }

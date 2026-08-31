@@ -1,14 +1,17 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, LogOut, LogIn, Settings, MessageSquare, ChevronDown } from 'lucide-react';
+import { User, LogOut, LogIn, Settings, MessageSquare, ChevronDown, Loader2 } from 'lucide-react';
 import { useAppStore } from '../../lib/store';
 import { getInitials } from '../../utils/helpers';
 import { useTranslation } from '../../hooks/useTranslation';
+import { loginWithGoogle, logout as authLogout } from '../../services/authService';
+import toast from 'react-hot-toast';
 
 export const UserMenu: React.FC = () => {
   const { user, isAuthenticated, logout } = useAppStore();
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
+  const [isSigningIn, setIsSigningIn] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { t } = useTranslation();
 
@@ -22,13 +25,29 @@ export const UserMenu: React.FC = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  const handleGoogleSignIn = async () => {
+    setIsSigningIn(true);
+    try {
+      await loginWithGoogle();
+    } catch (error) {
+      setIsSigningIn(false);
+      toast.error(error instanceof Error ? error.message : 'Google sign-in failed.');
+    }
+  };
+
   if (!isAuthenticated || !user) {
     return (
       <button 
-        onClick={() => navigate('/login')}
-        className="text-sm font-medium text-blue-900 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
+        onClick={handleGoogleSignIn}
+        disabled={isSigningIn}
+        className="inline-flex items-center text-sm font-medium text-blue-900 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 disabled:cursor-not-allowed disabled:opacity-60"
       >
-        <LogIn className="w-4 h-4 mr-1.5 inline-block" /> {t('header.signIn') || 'Sign In'}
+        {isSigningIn ? (
+          <Loader2 className="w-4 h-4 mr-1.5 animate-spin" />
+        ) : (
+          <LogIn className="w-4 h-4 mr-1.5" />
+        )}
+        {t('header.signIn') || 'Sign In'}
       </button>
     );
   }
@@ -38,8 +57,9 @@ export const UserMenu: React.FC = () => {
     navigate(path);
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     setIsOpen(false);
+    await authLogout();
     logout();
     navigate('/');
   };

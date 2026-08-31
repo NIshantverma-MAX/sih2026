@@ -1,6 +1,51 @@
-# BIS SmartGuide — Database Schema
+# BIS SmartGuide - Database Schema
 
-Future database architecture for the BIS SmartGuide platform.
+Database architecture for the BIS SmartGuide platform. The tables below include deployed InsForge tables and longer-term application entities.
+
+## Official Assistant Corpus
+
+### bis_source_documents
+| Column | Type | Description |
+|--------|------|-------------|
+| id | TEXT | Stable source identifier |
+| title | TEXT | Human-readable title |
+| document_name | TEXT | Official document or page name |
+| url | TEXT | Direct BIS source URL |
+| source_type | TEXT | standard, regulation, guideline, notification, website |
+| official_domain | TEXT | Verified BIS hostname |
+| last_checked | DATE | Date the source was last checked |
+| is_active | BOOLEAN | Controls retrieval eligibility |
+| metadata | JSONB | Publisher, authority, provenance, content type, hash/row count where available, ingestion state, and retrieval policy |
+
+RLS exposes active sources read-only. The backend also rejects any URL outside `bis.gov.in` and its subdomains.
+
+### bis_source_chunks
+| Column | Type | Description |
+|--------|------|-------------|
+| id | TEXT | Stable excerpt or product-row identifier |
+| document_id | TEXT | FK -> bis_source_documents |
+| section | TEXT | Source section/category |
+| clause | TEXT | Clause reference when available |
+| page | INTEGER | One-based PDF page when available |
+| chunk_text | TEXT | Grounding excerpt |
+| keywords | TEXT[] | Product names, aliases, and IS numbers |
+| search_text | TEXT | Trigger-maintained full-text value |
+| metadata | JSONB | Record kind, product, standard number/title, authority, source URL, and last check date |
+
+`match_bis_source_chunks` normalizes punctuation, performs indexed full-text retrieval, and returns metadata and keywords for deterministic re-ranking in `ask-bis`.
+
+### bis_demo_reference_records
+| Column | Type | Description |
+|--------|------|-------------|
+| id | TEXT | Stable fixture identifier |
+| record_type | TEXT | HUID sample, laboratory sample, prototype standard list, or business template |
+| external_key | TEXT | Fixture key when present |
+| payload | JSONB | User-supplied prototype data |
+| provenance | JSONB | Origin, claimed status, and explicit warning |
+| is_demo | BOOLEAN | Enforced `TRUE` by a database check |
+| verification_status | TEXT | `unverified_demo` or `reference_only` |
+
+This table is intentionally disconnected from `bis_source_documents` and `bis_source_chunks`. The assistant cannot cite it as official evidence.
 
 ## Entity Relationship
 
@@ -90,15 +135,31 @@ Future database architecture for the BIS SmartGuide platform.
 | status | ENUM | answered, pending, error |
 | created_at | TIMESTAMP | |
 
+### assistant_conversations
+| Column | Type | Description |
+|--------|------|-------------|
+| id | UUID | Primary key |
+| user_id | UUID | FK -> `auth.users`; defaults to the signed-in user |
+| title | TEXT | First-question summary, 1-120 characters |
+| language | ENUM | en, hi |
+| created_at | TIMESTAMPTZ | Creation time |
+| updated_at | TIMESTAMPTZ | Advanced whenever a message is appended |
+
+RLS permits only the owning authenticated user to insert or read a conversation. Anonymous users have no table privileges.
+
 ### assistant_messages
 | Column | Type | Description |
 |--------|------|-------------|
 | id | UUID | Primary key |
-| query_id | UUID | FK -> queries |
+| conversation_id | UUID | Composite FK with `user_id` -> assistant_conversations |
+| user_id | UUID | FK -> `auth.users`; defaults to the signed-in user |
 | role | ENUM | user, assistant |
 | content | TEXT | Message content |
-| response_json | JSONB | Structured response |
-| created_at | TIMESTAMP | |
+| language | ENUM | en, hi |
+| response | JSONB | Structured answer, warnings, and official-source citations |
+| created_at | TIMESTAMPTZ | Creation time |
+
+RLS permits only the owning authenticated user to insert or read messages. The composite `(conversation_id, user_id)` foreign key prevents a user from attaching a message to another user's conversation even if its UUID is known.
 
 ### documents
 | Column | Type | Description |
