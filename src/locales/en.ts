@@ -110,5 +110,313 @@ export const en = {
   common: {
     general: 'General',
     explore: 'Explore'
-  }
+  },
+  standards: {
+    title: 'Standards Discovery',
+    subtitle: 'Identify and understand applicable Indian Standards',
+    backToHome: 'Back to Home',
+    backToResults: 'Back to results',
+    breadcrumbHome: 'Home',
+    breadcrumbStandards: 'Standards',
+
+    searchLabel: 'Search standards',
+    searchPlaceholder: 'Search by product, material, or IS number...',
+    searchHint: 'Describe your product, its material, intended use, or search directly by an IS number.',
+    search: 'Search',
+    clearSearch: 'Clear search',
+
+    emptyTitle: 'Find the right Indian Standard',
+    popularCategories: 'Popular categories',
+    exampleSearches: 'Try an example search',
+    categories: {
+      electrical: 'Electrical',
+      food: 'Food & Agriculture',
+      construction: 'Construction',
+      mechanical: 'Mechanical',
+      consumer: 'Consumer Products',
+      textiles: 'Textiles'
+    },
+    categoryNotInDataset: 'No standard in this prototype dataset is classified here yet.',
+    examples: {
+      waterPurifier: 'Water purifier',
+      ledBulb: 'LED bulb',
+      pressureCooker: 'Pressure cooker',
+      steelBottle: 'Stainless steel bottle'
+    },
+
+    productTitle: 'Product identified',
+    productPrototype: 'Prototype analysis based on your query. Verify against official BIS source.',
+    productCategory: 'Category',
+    productMaterial: 'Material',
+    productUse: 'Intended use',
+    productMatchStrength: 'Interpretation confidence',
+    productNotIdentified: 'Could not identify a specific product from this query.',
+    productEdit: 'Correct this',
+    productEditHint: 'Change any detail we read wrongly, then re-run the recommendations.',
+    productName: 'Product',
+    productMaterialOptional: 'Material (optional)',
+    productUseOptional: 'Intended use (optional)',
+    productMaterialPlaceholder: 'e.g. Stainless steel',
+    productUsePlaceholder: 'e.g. Drinking water',
+    productUpdate: 'Update recommendations',
+    productNotIdentifiedTitle: 'Product not identified',
+    productNotIdentifiedDesc:
+      'Your words were used to search, but they did not match a product this prototype knows. Correct the details below, or try a more specific description.',
+    productAmbiguousTitle: 'More detail is needed',
+    productAmbiguousDesc: 'is too broad to point to specific Indian Standards. Add the product type and what it is made of or used for.',
+    productTypeQuestion: 'What type of product?',
+    productTypePlaceholder: 'e.g. Injection moulding machine',
+    productUseOrMaterial: 'Intended use or material',
+    productUseOrMaterialPlaceholder: 'e.g. Industrial / steel',
+    productUpdateSearch: 'Search again',
+
+    recommendedTitle: 'Recommended standards',
+    potentialTitle: 'Potentially applicable standards',
+    resultsFor: 'Results for',
+    standardsFound: 'standards found',
+    showing: 'Showing',
+    of: 'of',
+    loadMore: 'Load More',
+    filtersHid: 'filters are hiding some matches',
+    clearToSeeAll: 'Clear filters to see all matches',
+
+    filters: 'Filters',
+    filtersTitle: 'Refine results',
+    openFilters: 'Filters',
+    clearFilters: 'Clear all',
+    activeFilters: 'active',
+    category: 'Category',
+    sector: 'BIS sector',
+    status: 'Status',
+    relevanceFilter: 'Relevance',
+    certification: 'Certification requirement',
+    icsGroup: 'ICS subject group',
+    icsHint: 'ICS is the international subject classification carried by each standard.',
+    latestRevisionOnly: 'Current revisions only',
+    latestRevisionHint: 'Hides standards that are withdrawn or under revision.',
+    allCategories: 'All categories',
+    allSectors: 'All sectors',
+    allStatuses: 'All statuses',
+    allRelevance: 'Any relevance',
+    allCertification: 'Any requirement',
+    allIcs: 'All ICS groups',
+
+    sortLabel: 'Sort by',
+    mostRelevant: 'Most Relevant',
+    recent: 'Recently Updated',
+    az: 'A–Z',
+    standardNumber: 'Standard Number',
+
+    relevance: {
+      high: 'High relevance',
+      medium: 'Medium relevance',
+      low: 'Low relevance'
+    },
+    relevanceShort: {
+      high: 'High',
+      medium: 'Medium',
+      low: 'Low'
+    },
+    matchScore: 'Match score',
+    whyRelevant: 'Why this is relevant',
+    matchedOn: 'Matched on',
+    noReason: 'Listed because it matches the filters you selected.',
+
+    notFoundTitle: 'No standards match this search',
+    notFoundDesc: 'Nothing in the current dataset matches your query and filters.',
+    tryInstead: 'Try one of these instead',
+    tryAnother: 'Try Another Search',
+    askSmartGuide: 'Ask SmartGuide',
+    askAboutThis: 'Ask SmartGuide',
+    askAria: 'Ask SmartGuide about this standard',
+
+    errorTitle: 'Could not load standards',
+    errorDesc: 'Something went wrong while searching. Please try again.',
+
+    whyTitle: 'Why these standards?',
+    whyDesc: 'Each result is matched by comparing your query against the title, scope, description and requirements recorded for every standard.',
+    whyEmpty: 'Search for a product to see how standards are matched.',
+    viewAnalysis: 'View Detailed Analysis',
+    analysisTitle: 'How these standards were matched',
+    analysis: {
+      interpreted: 'Terms searched',
+      interpretedNote: 'Words you typed, plus related keywords added by the product interpretation.',
+      weights: 'Points per matched field',
+      weightsNote: 'A full-phrase match on a field scores the points shown. Single words score less, and keywords added by interpretation score half.',
+      thresholds: 'Relevance bands',
+      thresholdsHigh: 'High relevance from',
+      thresholdsMedium: 'Medium relevance from',
+      thresholdsLow: 'Below that, low relevance',
+      points: 'points',
+      topMatches: 'Top matches and their signals',
+      limitations: 'Limits of this analysis',
+      limitation: {
+        'text-matching': 'This is text matching over the project dataset, not a semantic or legal assessment.',
+        'not-official-ranking': 'The scores and bands are this prototype’s own. They are not BIS ranking rules.',
+        'dataset-subset': 'The dataset holds a small subset of Indian Standards, so a genuinely applicable standard may be absent.',
+        'verify-source': 'Confirm any standard against the official BIS source before acting on it.'
+      }
+    },
+    signal: {
+      'standard-number': 'Standard number',
+      title: 'Title',
+      scope: 'Official scope',
+      description: 'Description',
+      requirement: 'Key requirement',
+      category: 'Category',
+      sector: 'BIS sector',
+      'product-category': 'Interpreted product category'
+    },
+
+    // Keyed by the literal values held in src/data/standards.ts so a label is only ever
+    // shown for a value that exists in the dataset.
+    statusLabel: {
+      active: 'Active',
+      'under-revision': 'Under revision',
+      withdrawn: 'Withdrawn'
+    },
+    certLabel: {
+      mandatory: 'Mandatory (BIS certification required)',
+      voluntary: 'Voluntary',
+      'self-declaration': 'Self-declaration'
+    },
+    certLabelShort: {
+      mandatory: 'Mandatory',
+      voluntary: 'Voluntary',
+      'self-declaration': 'Self-declaration'
+    },
+    categoryLabel: {
+      Household: 'Household',
+      Electrical: 'Electrical',
+      Food: 'Food',
+      Construction: 'Construction',
+      'Consumer Goods': 'Consumer Goods',
+      Other: 'Other'
+    },
+    sectorLabel: {
+      Metallurgical: 'Metallurgical',
+      Mechanical: 'Mechanical',
+      Electrotechnical: 'Electrotechnical',
+      'Food and Agriculture': 'Food and Agriculture',
+      'Civil Engineering': 'Civil Engineering',
+      Chemical: 'Chemical',
+      Other: 'Other'
+    },
+
+    aiAssisted: 'AI-assisted recommendation',
+    verifyOfficial: 'Verify against official BIS source',
+    prototypeNote: 'Prototype data — verify against official BIS sources.',
+    officialFacts: 'From the BIS record',
+    interpretation: 'System interpretation',
+    interpretationNote: 'Generated by this prototype from the text above, not quoted from BIS.',
+
+    evidence: {
+      title: 'Source documents',
+      note: {
+        'clause-level': 'The documents below include a specific clause or section for this standard.',
+        'document-only': 'The documents below reference this standard, but no clause-level extract is held.',
+        none: 'No source document is on file for this standard in the prototype dataset.'
+      },
+      catalogueRef: 'Catalogue reference',
+      catalogueRefNote: 'A pointer to the standard’s own entry, not an extract from it.',
+      clause: 'Clause',
+      section: 'Section',
+      page: 'Page',
+      openDocument: 'Open document',
+      viewSource: 'View source',
+      viewAllSources: 'View all sources',
+      sourcesCount: 'source document(s)',
+      noneShort: 'No source on file'
+    },
+
+    version: {
+      current: 'Current revision',
+      'under-revision': 'Under revision',
+      withdrawn: 'Withdrawn',
+      underRevisionNote: 'BIS records this standard as under revision. A newer revision may be published.',
+      withdrawnNote: 'This standard has been withdrawn. Do not rely on it without checking the current replacement.',
+      supersededBy: 'Superseded by',
+      viewLatest: 'View Latest',
+      checkLatest: 'Check Current Revision',
+      verifyNote: 'Opens the official BIS standards catalogue.'
+    },
+
+    related: {
+      title: 'Related standards',
+      none: 'No related standards are recorded for this standard.',
+      basis: {
+        declared: 'Listed as related in the BIS record',
+        'same-ics-group': 'Same ICS subject group',
+        'same-category': 'Same category in this dataset'
+      },
+      basisNote: 'Relations derived from shared classification are this prototype’s grouping, not a BIS declaration.'
+    },
+
+    compare: {
+      add: 'Compare',
+      added: 'Added to compare',
+      remove: 'Remove from compare',
+      title: 'Compare standards',
+      open: 'Compare',
+      clear: 'Clear',
+      limit: 'You can compare up to 3 standards.',
+      empty: 'Select at least two standards to compare.',
+      selected: 'selected',
+      field: 'Field',
+      close: 'Close comparison'
+    },
+
+    save: {
+      save: 'Save',
+      saved: 'Saved',
+      aria: 'Save standard',
+      savedToast: 'Standard saved.',
+      removedToast: 'Standard removed from saved items.',
+      viewSaved: 'View saved items'
+    },
+
+    actions: {
+      viewStandard: 'View Standard',
+      viewDetails: 'View Details',
+      certification: 'Get Certification Guidance',
+      certificationDesc: 'Check schemes & requirements',
+      labs: 'Find Testing Laboratories',
+      labsDesc: 'Authorized testing facilities',
+      ask: 'Ask SmartGuide',
+      askDesc: 'Chat about this standard'
+    },
+
+    needHelp: 'Need Help?',
+    needHelpDesc: 'Unsure which standard applies? Ask our intelligent assistant.',
+
+    notFoundStandard: 'Standard not found.',
+    notFoundStandardDesc: 'No standard with this identifier exists in the dataset.',
+    backToStandards: 'Back to Standards'
+  },
+  standardDetails: {
+    scope: 'Scope',
+    techScope: 'Technical Scope:',
+    extractedRequirements: 'Key Requirements',
+    requirementsNote: 'Recorded against this standard in the project dataset.',
+    noRequirements: 'No specific requirements are recorded for this standard.',
+    newerVersion: 'A newer version of this standard is available.',
+    underRevision: 'This standard is currently under revision.',
+    saved: 'Saved',
+    saveStandard: 'Save Standard',
+    certGuidance: 'Certification Guidance',
+    checkSchemes: 'Check schemes & requirements',
+    findLabs: 'Find Testing Labs',
+    authFacilities: 'Authorized testing facilities',
+    askSmartGuide: 'Ask SmartGuide',
+    chatAbout: 'Chat about this standard',
+    officialSources: 'Official Sources',
+    atAGlance: 'At a glance',
+    icsCode: 'ICS code',
+    sector: 'BIS sector',
+    category: 'Category',
+    revision: 'Revision',
+    year: 'Year',
+    certificationRequirement: 'Certification requirement',
+    nextSteps: 'Next steps'
+  },
 };
