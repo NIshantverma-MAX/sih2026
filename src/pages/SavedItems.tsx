@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useTranslation } from "../hooks/useTranslation";
 import { useAppStore } from '../lib/store';
 import { PageHeader, Tabs, EmptyState } from '../components/ui';
 import { Bookmark, Trash2 } from 'lucide-react';
@@ -7,7 +6,6 @@ import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 
 export default function SavedItems() {
-  const { t } = useTranslation();
   const { savedItems, removeSavedItem } = useAppStore();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('all');
@@ -18,13 +16,10 @@ export default function SavedItems() {
     toast.success('Item removed from saved list');
   };
 
-  // Each saved item carries the id of the thing it points at, so it opens that thing
-  // rather than the list it came from. `laboratory` previously navigated to
-  // `/laboratories`, which is not a route and landed on the not-found page.
   const handleNavigate = (type: string, id: string) => {
     switch (type) {
-      case 'standard': navigate(`/standards/${id}`); break;
-      case 'laboratory': navigate(`/labs/${id}`); break;
+      case 'standard': navigate(`/standards`); break;
+      case 'laboratory': navigate(`/laboratories`); break;
       case 'query': navigate(`/my-queries`); break;
       default: break;
     }
@@ -45,7 +40,7 @@ export default function SavedItems() {
   return (
     <div className="space-y-6">
       <PageHeader 
-        title={t("savedItems.title") || "Saved Items"} 
+        title="Saved Items" 
         subtitle="Your bookmarked standards, laboratories, and queries" 
       />
 

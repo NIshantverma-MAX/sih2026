@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
-import { useTranslation } from "../hooks/useTranslation";
 import { useNavigate } from 'react-router-dom';
 import { PageHeader, SearchBar, Tabs, EmptyState } from '../components/ui';
 import { QueryCard } from '../components/common/QueryCard';
 import { MessageSquare } from 'lucide-react';
 
 export default function MyQueries() {
-  const { t } = useTranslation();
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
 
@@ -67,7 +65,7 @@ export default function MyQueries() {
   return (
     <div className="space-y-6">
       <PageHeader 
-        title={t("myQueries.title") || "My Queries"} 
+        title="My Queries" 
         subtitle="View and manage your past queries" 
       />
 

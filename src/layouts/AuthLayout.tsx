@@ -1,10 +1,8 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
 import { Shield } from 'lucide-react';
-import { useTranslation } from '../hooks/useTranslation';
 
 const AuthLayout = () => {
-  const { t } = useTranslation();
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
@@ -17,7 +15,7 @@ const AuthLayout = () => {
           BIS SmartGuide
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
-          {t('auth.brandTagline')}
+          AI Standards & Certification Assistant
         </p>
       </div>
 
