@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Search, ShieldCheck, FlaskConical, Shield
+import {
+  Search, ShieldCheck, FlaskConical
 } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { recentQueries } from '../data/queries';
 import { useTranslation } from '../hooks/useTranslation';
 import { searchService } from '../services/searchService';
-import bisBuildingImg from '../assets/bis-building-crop.png';
+import bisHomeHeroImg from '../assets/bis-home-hero.png';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -44,7 +44,7 @@ export default function Home() {
   return (
     <div className="space-y-4 max-w-[1360px] mx-auto pb-12">
       {/* Hero Section */}
-      <section className="bg-white rounded-2xl shadow-sm overflow-hidden min-h-[440px] relative border border-slate-200">
+      <section className="bg-white rounded-2xl shadow-sm overflow-hidden min-h-[440px] lg:min-h-[558.031px] relative border border-slate-200">
         
         {/* Background Geometric Pattern */}
         <div className="absolute inset-0 z-0 bg-[#f4f7fc]" 
@@ -55,7 +55,7 @@ export default function Home() {
              }}>
         </div>
 
-        <div className="flex flex-col lg:flex-row h-full relative z-10 min-h-[440px]">
+        <div className="flex flex-col lg:flex-row h-full relative z-10 min-h-[440px] lg:min-h-[558.031px]">
           
           <div className="w-full lg:w-[65%] p-8 lg:p-12 flex flex-col justify-center relative">
             {/* The white diagonal cut covering the image edge */}
@@ -115,14 +115,14 @@ export default function Home() {
             </div>
           </div>
           
-          <div className="hidden lg:block relative w-[35%] h-full bg-slate-100 overflow-hidden shrink-0">
+          <div className="hidden lg:block relative w-[35%] h-[558.031px] bg-slate-100 overflow-hidden shrink-0">
              <div className="absolute inset-0 bg-white" style={{ clipPath: 'polygon(0 0, 8% 0, 0 100%)', zIndex: 10 }}></div>
              <div className="absolute top-6 right-6 bg-white px-3 py-1.5 rounded-lg shadow-sm border border-slate-100 z-20 flex flex-col items-center">
                <img src="/bis-logo.png" alt="Govt of India" className="h-4 w-auto mb-1 opacity-90" />
                <span className="text-[9px] font-bold text-blue-900 tracking-tight">Govt of India (GOI)</span>
              </div>
             <img 
-              src={bisBuildingImg} 
+              src={bisHomeHeroImg}
               alt="Bureau of Indian Standards Building" 
               className="w-full h-full object-cover"
               style={{ objectPosition: '30% center' }}
