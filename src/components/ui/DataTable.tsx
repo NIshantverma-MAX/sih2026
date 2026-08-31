@@ -1,7 +1,6 @@
 import React from 'react';
 import { cn } from '../../utils/helpers';
 import { Card } from './Card';
-import { useTranslation } from '../../hooks/useTranslation';
 
 export interface Column<T> {
   key: string;
@@ -21,14 +20,13 @@ export function DataTable<T extends { id?: string | number }>({
   columns,
   data,
   onRowClick,
-  emptyMessage,
+  emptyMessage = "No data available",
   className
 }: DataTableProps<T>) {
-  const { t } = useTranslation();
   if (!data.length) {
     return (
       <div className="p-8 text-center text-gray-500 bg-white border border-gray-200 rounded-lg">
-        {emptyMessage ?? t('common.noData')}
+        {emptyMessage}
       </div>
     );
   }

@@ -6,7 +6,6 @@ import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { PageHeader } from '../components/ui/PageHeader';
 import { useStore } from '../lib/store';
-import { useTranslation } from '../hooks/useTranslation';
 import {
   askQuestion,
   createConversation,
@@ -52,7 +51,6 @@ function formatConversationDate(timestamp: string): string {
 
 function AssistantChat() {
   const { language, user, isAuthenticated, authHydrated } = useStore();
-  const { t } = useTranslation();
   const [query, setQuery] = useState('');
   const [messages, setMessages] = useState<AssistantMessageType[]>([]);
   const [conversations, setConversations] = useState<AssistantConversation[]>([]);
@@ -254,7 +252,7 @@ function AssistantChat() {
           <>
             <div className="flex h-10 items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-600 shadow-sm">
               <Globe className="h-4 w-4" />
-              <span>{t('assistant.language') || (language === 'hi' ? 'हिंदी' : 'English')}</span>
+              <span>{language === 'hi' ? 'हिंदी' : 'English'}</span>
             </div>
             <Button
               variant="outline"
@@ -262,7 +260,7 @@ function AssistantChat() {
               onClick={startNewChat}
               disabled={isChatBusy}
             >
-              {t('assistant.newChat') || (language === 'hi' ? 'नई चैट' : 'New chat')}
+              {language === 'hi' ? 'नई चैट' : 'New chat'}
             </Button>
           </>
         )}
@@ -378,17 +376,17 @@ function AssistantChat() {
                   }
                 }}
                 disabled={isChatBusy || !authHydrated}
-                placeholder={t('assistant.placeholder') || (language === 'hi' ? 'अपना सवाल यहाँ लिखें...' : 'Type your question here...')}
+                placeholder={language === 'hi' ? 'अपना सवाल यहाँ लिखें...' : 'Type your question here...'}
                 className="min-w-0 flex-1"
               />
               <Button
                 onClick={() => void handleSend()}
                 disabled={isChatBusy || !authHydrated || !query.trim()}
-                aria-label={t('assistant.send') || (language === 'hi' ? 'भेजें' : 'Send')}
+                aria-label={language === 'hi' ? 'भेजें' : 'Send'}
                 className="flex-shrink-0 bg-blue-900 text-white hover:bg-blue-800"
                 icon={Send}
               >
-                <span className="hidden sm:inline">{t('assistant.send') || (language === 'hi' ? 'भेजें' : 'Send')}</span>
+                <span className="hidden sm:inline">{language === 'hi' ? 'भेजें' : 'Send'}</span>
               </Button>
             </div>
           </div>

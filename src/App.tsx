@@ -6,15 +6,9 @@ import { useStore } from './lib/store';
 import { hydrateCurrentUser } from './services/authService';
 
 function App() {
-  const theme = useStore(state => state.settings?.theme || 'light');
   const login = useStore((state) => state.login);
   const logout = useStore((state) => state.logout);
   const setAuthHydrated = useStore((state) => state.setAuthHydrated);
-
-  useEffect(() => {
-    const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-    document.documentElement.classList.toggle('dark', isDark);
-  }, [theme]);
 
   useEffect(() => {
     let cancelled = false;
@@ -56,11 +50,10 @@ function App() {
       <RouterProvider router={router} />
       <Toaster position="top-right" toastOptions={{
         duration: 3000,
-        className: 'dark:bg-slate-800 dark:text-white dark:border-slate-700',
         style: {
-          background: 'var(--toast-bg, #fff)',
-          color: 'var(--toast-color, #1e3a5f)',
-          border: '1px solid var(--toast-border, #e5e7eb)',
+          background: '#fff',
+          color: '#1e3a5f',
+          border: '1px solid #e5e7eb',
         },
       }} />
     </>

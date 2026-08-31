@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useTranslation } from "../hooks/useTranslation";
 import { 
   Diamond, 
   Info, 
@@ -21,7 +20,6 @@ import { HUIDVerification } from '../types';
 import { cn } from '../utils/helpers';
 
 export default function Hallmarking() {
-  const { t } = useTranslation();
   const [huidInput, setHuidInput] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
   const [verificationResult, setVerificationResult] = useState<HUIDVerification | null>(null);
@@ -51,7 +49,7 @@ export default function Hallmarking() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       <PageHeader 
-        title={t("hallmarking.title") || "Hallmarking"}
+        title="Hallmarking"
         subtitle="Verify HUID or learn about hallmarking."
       />
 
@@ -62,7 +60,7 @@ export default function Hallmarking() {
             <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-blue-900">
               <Diamond className="w-6 h-6" />
             </div>
-            <h2 className="text-xl font-bold text-gray-900">{t("hallmarking.verifyTitle") || "Verify HUID"}</h2>
+            <h2 className="text-xl font-bold text-gray-900">Verify HUID</h2>
           </div>
           
           <p className="text-sm text-gray-600 mb-6 flex-1">
